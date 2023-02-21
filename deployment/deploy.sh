@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-env=prod
+env=$1
 project=alrescha
 subDomain=airepair
 domain=celestialstudio.net
