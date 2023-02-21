@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: "AWS::Serverless-2016-10-31"
-Description: venus deployment cloudformation script
+Description: alrescha deployment cloudformation script
     
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -67,6 +67,42 @@ Resources:
                   "type": "aws"
                 }
               }
+            },
+            "/api/predict": {
+              "post": {
+                "responses": {
+                  "200": {
+                    "description": "200 response",
+                    "headers": {
+                      "Access-Control-Allow-Origin": {
+                        "schema": {"type": "string"}
+                      }
+                    },
+                    "content": {
+                      "application/json": {
+                        "schema": {
+                          "$ref": "#/components/schemas/Empty"
+                        }
+                      }
+                    }
+                  }
+                },
+                "x-amazon-apigateway-integration": {
+                  "type": "aws_proxy",
+                  "httpMethod": "POST",
+                  "uri": !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:278497686406:function:${Project}-${TargetEnvr}-predict/invocations",
+                  "responses": {
+                    "default": {
+                      "statusCode": "200",
+                      "responseParameters": {
+                        "method.response.header.Access-Control-Allow-Origin": "'*'"
+                      }
+                    }
+                  },
+                  "passthroughBehavior": "when_no_match",
+                  "contentHandling": "CONVERT_TO_TEXT"
+                }
+              }
             }
           },
           "definitions": {
@@ -111,6 +147,34 @@ Resources:
     DependsOn: [ServerlessApi, LambdaChat]
     Properties:
       FunctionName: !Sub ${Project}-${TargetEnvr}-chat
+      Action: 'lambda:InvokeFunction'
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ServerlessApi}/*
+  LambdaPredict:
+    Type: AWS::Serverless::Function
+    Properties:
+      Architectures: [arm64]
+      Handler: index.predict
+      Runtime: !Sub ${NodeJsVer}
+      FunctionName: !Sub ${Project}-${TargetEnvr}-predict
+      Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/${LambdaExecutionRole}"
+      CodeUri: ../../dist/webpack/lambda
+      MemorySize: 128
+      Environment:
+        Variables:
+          PROJECT: !Sub ${Project}
+          ENVR: !Sub ${TargetEnvr}
+          DB_CLUSTER: !Sub '{{resolve:ssm:${TargetEnvr}-db-cluster:1}}'
+          DB_HOST: !Sub '{{resolve:ssm:${TargetEnvr}-db-host:1}}'
+          DB_PWD: !Sub '{{resolve:ssm:${TargetEnvr}-db-pwd:1}}'
+          DB_USER: !Sub '{{resolve:ssm:${TargetEnvr}-db-user:1}}'
+          CHANNEL_TOKEN: !Sub '{{resolve:ssm:${Project}-${TargetEnvr}-line-token:1}}'
+          LIFF_ID: !Sub '{{resolve:ssm:${Project}-${TargetEnvr}-liff:1}}'
+  InvokePermissionPredict:
+    Type: AWS::Lambda::Permission
+    DependsOn: [ServerlessApi, LambdaPredict]
+    Properties:
+      FunctionName: !Sub ${Project}-${TargetEnvr}-predict
       Action: 'lambda:InvokeFunction'
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ServerlessApi}/*
@@ -183,7 +247,7 @@ Resources:
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub ${Project}-${TargetEnvr}-y
+      BucketName: !Sub ${Project}-${TargetEnvr}
       WebsiteConfiguration:
         ErrorDocument: index.html
         IndexDocument: index.html
