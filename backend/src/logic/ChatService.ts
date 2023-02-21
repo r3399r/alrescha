@@ -20,8 +20,8 @@ export class ChatService {
     await this.client.replyMessage(event.replyToken, [
       {
         type: 'text',
-        text: 'hello!'
-      }
-    ])
+        text: 'hello2!',
+      },
+    ]);
   }
 }
