@@ -43,11 +43,13 @@ async function apiPredict(event: LambdaEvent, service: PredictService) {
   if (event.headers === null)
     throw new BadRequestError('headers should not be empty');
   switch (event.httpMethod) {
+    case 'GET':
+      return service.getPredictUrl();
     case 'POST':
       if (event.body === null)
         throw new BadRequestError('body should not be empty');
 
-      return service.receiveImage(JSON.parse(event.body) as { image: string });
+      return service.predictImages(JSON.parse(event.body) as { image: string });
     default:
       throw new InternalServerError('unknown http method');
   }

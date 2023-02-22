@@ -16,7 +16,7 @@ const Upload = () => {
     if (e.target.files) {
       console.log(e.target.files[0]);
       file2Base64(e.target.files[0]).then((file: string) => {
-        predictEndpoint.predict({ image: file });
+        predictEndpoint.postPredict({ image: file });
       });
     }
   };

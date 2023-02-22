@@ -14,7 +14,7 @@ export async function chat(
       channelAccessToken: String(process.env.CHANNEL_TOKEN),
       channelSecret: String(process.env.CHANNEL_SECRET),
     });
-
+    console.log(JSON.stringify(event));
     service = bindings.get(ChatService);
 
     if (event.events[0].type === 'message')
