@@ -1,1 +1,1 @@
-\i ./table/treasure.sql
+\i ./table/image.sql

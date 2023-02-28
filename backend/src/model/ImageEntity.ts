@@ -1,8 +1,8 @@
 import { BeforeInsert, BeforeUpdate, Column, Entity, Generated } from 'typeorm';
-import { Treasure } from './Treasure';
+import { Image } from './Image';
 
-@Entity({ name: 'treasure' })
-export class TreasureEntity implements Treasure {
+@Entity({ name: 'image' })
+export class ImageEntity implements Image {
   @Column({ primary: true })
   @Generated('uuid')
   id!: string;
@@ -10,14 +10,14 @@ export class TreasureEntity implements Treasure {
   @Column({ type: 'text', name: 'user_id' })
   userId!: string;
 
-  @Column({ type: 'text', name: 'display_name' })
-  displayName!: string;
-
-  @Column({ type: 'float' })
-  stage!: number;
-
   @Column({ type: 'text' })
   status!: string;
+
+  @Column({ type: 'text', name: 'predict_id', default: null })
+  predictId: string | null = null;
+
+  @Column({ type: 'text', name: 'predict_time', default: null })
+  predictTime: number | null = null;
 
   @Column({ type: 'timestamp', name: 'date_created', default: null })
   dateCreated!: string;

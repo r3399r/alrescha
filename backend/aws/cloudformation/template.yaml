@@ -79,6 +79,12 @@ Resources:
             },
             "/api/predict": {
               "get": {
+                "parameters": [{
+                  "name": "userId",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                }],
                 "responses": {
                   "200": {
                     "description": "200 response",
@@ -113,6 +119,12 @@ Resources:
                 }
               },
               "post": {
+                "parameters": [{
+                  "name": "userId",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                }],
                 "responses": {
                   "200": {
                     "description": "200 response",
@@ -130,6 +142,59 @@ Resources:
                     }
                   }
                 },
+                "x-amazon-apigateway-integration": {
+                  "type": "aws_proxy",
+                  "httpMethod": "POST",
+                  "uri": !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:278497686406:function:${Project}-${TargetEnvr}-predict/invocations",
+                  "responses": {
+                    "default": {
+                      "statusCode": "200",
+                      "responseParameters": {
+                        "method.response.header.Access-Control-Allow-Origin": "'*'"
+                      }
+                    }
+                  },
+                  "passthroughBehavior": "when_no_match",
+                  "contentHandling": "CONVERT_TO_TEXT"
+                }
+              }
+            },
+            "/api/predict/process": {
+              "post": {
+                "parameters": [{
+                  "name": "userId",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                }, {
+                  "name": "imageId",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                }, {
+                  "name": "fileExt",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                }],
+                "responses": {
+                  "200": {
+                    "description": "200 response",
+                    "headers": {
+                      "Access-Control-Allow-Origin": {
+                        "schema": {"type": "string"}
+                      }
+                    },
+                    "content": {
+                      "application/json": {
+                        "schema": {
+                          "$ref": "#/components/schemas/Empty"
+                        }
+                      }
+                    }
+                  }
+                },
+                "x-amazon-apigateway-request-validator" : "Validate query string parameters and headers",
                 "x-amazon-apigateway-integration": {
                   "type": "aws_proxy",
                   "httpMethod": "POST",
@@ -317,3 +382,14 @@ Resources:
                 }
             ]
           }'
+  S3BucketStorage:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${Project}-${TargetEnvr}-predict
+      LifecycleConfiguration:
+        Rules:
+        - Id: cleanup
+          Status: Enabled
+          ExpirationInDays: 3
+          NoncurrentVersionExpiration:
+            NoncurrentDays: 1

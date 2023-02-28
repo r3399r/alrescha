@@ -1,15 +1,7 @@
-export type PutTreasureRequest = {
-  userId: string;
-  stage: number;
-  answer?: string;
+import { ReplicateResponse } from './Replicate';
+
+export type PostPredictRequest = {
+  image: string;
 };
 
-export type GetTreasureResponse = {
-  id: string;
-  userId: string;
-  displayName: string;
-  stage: number;
-  status: string;
-  dateCreated: string | null;
-  dateUpdated: string | null;
-}[];
+export type PostPredictProcessRequest = ReplicateResponse;

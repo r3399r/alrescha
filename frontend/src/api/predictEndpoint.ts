@@ -1,7 +1,14 @@
 import http from 'src/celestial-ui/util/http';
+import { PostPredictRequest } from 'src/model/Api';
+import { ReplicateResponse } from 'src/model/Replicate';
 
-const postPredict = async (data: { image: string }) => await http.post('predict', { data });
+const postPredict = async (data: PostPredictRequest, userId: string) =>
+  await http.post<ReplicateResponse>('predict', {
+    data,
+    params: { userId },
+  });
 
-const getPredict = async () => await http.get<string[]>('predict');
+const getPredict = async (userId: string) =>
+  await http.get<string[]>('predict', { params: { userId } });
 
 export default { postPredict, getPredict };

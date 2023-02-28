@@ -65,8 +65,9 @@ const main = async () => {
           height: 400,
         },
         action: {
-          type: 'message',
-          text: '3',
+          type: 'postback',
+          data: 'query',
+          text: '進度查詢',
         },
       },
     ],

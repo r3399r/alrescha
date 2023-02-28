@@ -1,24 +1,22 @@
 import { Profile } from '@liff/get-profile';
 import liff from '@line/liff';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import predictEndpoint from 'src/api/predictEndpoint';
-import { file2Base64 } from 'src/util/fileConverter';
+import { getUserInfo, startPredict } from 'src/service/uploadService';
 
 const Upload = () => {
   const [profile, setProfile] = useState<Profile>();
+  const [success, setSuccess] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    liff.ready.then(() => liff.getProfile()).then((res) => setProfile(res));
+    liff.ready.then(getUserInfo).then((res) => {
+      setProfile(res.profile);
+    });
   }, []);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      console.log(e.target.files[0]);
-      file2Base64(e.target.files[0]).then((file: string) => {
-        predictEndpoint.postPredict({ image: file });
-      });
-    }
+    if (e.target.files && profile)
+      startPredict(e.target.files, profile.userId).then(() => setSuccess(true));
   };
 
   return (
@@ -29,6 +27,7 @@ const Upload = () => {
           上傳照片
         </button>
       </div>
+      {success && <div>上傳成功！</div>}
       <input
         type="file"
         onChange={handleChange}
