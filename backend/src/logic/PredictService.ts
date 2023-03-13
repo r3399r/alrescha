@@ -4,10 +4,13 @@ import { fileTypeFromBuffer } from 'file-type';
 import { inject, injectable } from 'inversify';
 import { DbAccess } from 'src/access/DbAccess';
 import { ImageAccess } from 'src/access/ImageAccess';
-import { compare } from 'src/celestial-service/util/compare';
-import { PostPredictProcessRequest, PostPredictRequest } from 'src/model/Api';
+import {
+  PostPredictProcessRequest,
+  PostPredictRequest,
+} from 'src/model/api/Predict';
 import { ImageEntity } from 'src/model/ImageEntity';
 import { ReplicateResponse } from 'src/model/Replicate';
+import { compare } from 'src/util/compare';
 
 /**
  * Service class for

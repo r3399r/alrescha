@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify';
-import { BadRequestError } from 'src/celestial-service/error';
+import { BadRequestError } from 'src/model/error';
 import { Image } from 'src/model/Image';
 import { ImageEntity } from 'src/model/ImageEntity';
 import { Database } from 'src/util/Database';

@@ -1,4 +1,4 @@
-import { ReplicateResponse } from './Replicate';
+import { ReplicateResponse } from 'src/model/Replicate';
 
 export type PostPredictRequest = {
   image: string;

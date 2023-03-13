@@ -1,8 +1,8 @@
 import { WebhookRequestBody } from '@line/bot-sdk';
 import { bindings } from 'src/bindings';
-import { BadRequestError } from 'src/celestial-service/error';
-import { LambdaContext, LambdaEvent } from 'src/celestial-service/model/Lambda';
 import { ChatService } from 'src/logic/ChatService';
+import { BadRequestError } from 'src/model/error';
+import { LambdaContext, LambdaEvent } from 'src/model/Lambda';
 import { BindingsHelper } from 'src/util/BindingsHelper';
 
 export async function chat(event: LambdaEvent, _context?: LambdaContext) {

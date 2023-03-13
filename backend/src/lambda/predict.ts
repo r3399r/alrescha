@@ -1,17 +1,13 @@
 import { bindings } from 'src/bindings';
-import {
-  BadRequestError,
-  InternalServerError,
-} from 'src/celestial-service/error';
-import { errorOutput, successOutput } from 'src/celestial-service/LambdaOutput';
-import {
-  LambdaContext,
-  LambdaEvent,
-  LambdaOutput,
-} from 'src/celestial-service/model/Lambda';
 import { PredictService } from 'src/logic/PredictService';
-import { PostPredictProcessRequest, PostPredictRequest } from 'src/model/Api';
+import {
+  PostPredictProcessRequest,
+  PostPredictRequest,
+} from 'src/model/api/Predict';
+import { BadRequestError, InternalServerError } from 'src/model/error';
+import { LambdaContext, LambdaEvent, LambdaOutput } from 'src/model/Lambda';
 import { BindingsHelper } from 'src/util/BindingsHelper';
+import { errorOutput, successOutput } from 'src/util/outputHelper';
 
 export async function predict(
   event: LambdaEvent,
