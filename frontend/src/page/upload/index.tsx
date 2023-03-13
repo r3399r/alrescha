@@ -94,6 +94,7 @@ const Upload = () => {
               className="w-[56px]"
               value={fidelity}
               onChange={(e) => setFidelity(e.target.value)}
+              inputMode="numeric"
             />
           </div>
           <div className="text-grey-600 text-[12px] leading-[18px] mt-[5px]">
@@ -120,6 +121,7 @@ const Upload = () => {
               className="w-[40px]"
               value={upscale}
               onChange={(e) => setUpscale(e.target.value)}
+              inputMode="numeric"
             />
           </div>
           <div className="flex justify-center gap-5 mt-6 mb-9">
