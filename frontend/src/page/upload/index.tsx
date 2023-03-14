@@ -22,6 +22,7 @@ const Upload = () => {
     liff.ready.then(getUserInfo).then((res) => {
       setProfile(res.profile);
     });
+    document.title = '上傳圖片';
   }, []);
 
   const onDelete = (i: number) => () => {
@@ -35,8 +36,7 @@ const Upload = () => {
   };
 
   return (
-    <div className="mx-[15px]">
-      <div className="py-[10px] text-center font-bold mb-[10px]">上傳圖片</div>
+    <div className="mx-[15px] mt-[10px]">
       <div className="text-[14px]">
         <div>
           <span className="text-blue">{profile?.displayName}</span> 的免費運算額度還有{' '}
@@ -65,10 +65,10 @@ const Upload = () => {
       )}
       {fileList.length > 0 && (
         <div>
-          <div className="overflow-x-scroll whitespace-nowrap mt-[10px] pb-10">
+          <div className="overflow-x-scroll whitespace-nowrap mt-[10px] pb-10 scrollbar-hide">
             {fileList.map((file, i) => (
-              <div className="inline-block h-[260px] mr-[10px] relative" key={i}>
-                <img className="h-[260px]" src={URL.createObjectURL(file)} />
+              <div className="inline-block h-[260px] mr-[10px] relative overflow-hidden" key={i}>
+                <img className="h-full max-w-none" src={URL.createObjectURL(file)} />
                 <img
                   className="absolute right-[10px] bottom-[10px] cursor-pointer"
                   src={IcDelete}

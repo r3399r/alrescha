@@ -162,11 +162,6 @@ Resources:
             "/api/predict/process": {
               "post": {
                 "parameters": [{
-                  "name": "userId",
-                  "in": "query",
-                  "required": true,
-                  "type": "string"
-                }, {
                   "name": "imageId",
                   "in": "query",
                   "required": true,

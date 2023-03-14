@@ -76,7 +76,6 @@ async function apiPredictProcess(event: LambdaEvent, service: PredictService) {
 
       return service.completePredict(
         JSON.parse(event.body) as PostPredictProcessRequest,
-        event.queryStringParameters.userId,
         event.queryStringParameters.imageId,
         event.queryStringParameters.fileExt
       );

@@ -42,7 +42,7 @@ export class PredictService {
 
       const newImage = await this.imageAccess.save(image);
 
-      const filename = `${userId}/${newImage.id}-before.${fileType?.ext}`;
+      const filename = `${userId}/${newImage.id}-a.${fileType?.ext}`;
       const bucket = `${process.env.PROJECT}-${process.env.ENVR}-predict`;
 
       await this.s3
@@ -65,7 +65,7 @@ export class PredictService {
           input: { image: url },
           webhook: `https://airepair${
             process.env.ENVR === 'test' ? '-test' : ''
-          }.celestialstudio.net/api/predict/process?userId=${userId}&imageId=${
+          }.celestialstudio.net/api/predict/process?imageId=${
             newImage.id
           }&fileExt=${fileType?.ext}`,
           webhook_events_filter: ['completed'],
@@ -108,12 +108,19 @@ export class PredictService {
 
   public async completePredict(
     data: PostPredictProcessRequest,
-    userId: string,
     imageId: string,
     fileExt: string
   ) {
     const res = await axios.get(data.output, { responseType: 'arraybuffer' });
     const buffer = Buffer.from(res.data, 'binary');
+
+    const image = await this.imageAccess.findById(imageId);
+    image.status = data.status;
+    image.predictTime = data.metrics.predict_time;
+
+    await this.imageAccess.save(image);
+
+    const userId = image.userId;
 
     const filename = `${userId}/${imageId}-after.${fileExt}`;
     const bucket = `${process.env.PROJECT}-${process.env.ENVR}-predict`;
@@ -125,11 +132,5 @@ export class PredictService {
         Key: filename,
       })
       .promise();
-
-    const image = await this.imageAccess.findById(imageId);
-    image.status = data.status;
-    image.predictTime = data.metrics.predict_time;
-
-    await this.imageAccess.save(image);
   }
 }
