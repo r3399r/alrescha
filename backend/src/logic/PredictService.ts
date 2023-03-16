@@ -4,11 +4,13 @@ import { fileTypeFromBuffer } from 'file-type';
 import { inject, injectable } from 'inversify';
 import { DbAccess } from 'src/access/DbAccess';
 import { ImageAccess } from 'src/access/ImageAccess';
+import { ViewUserAccess } from 'src/access/ViewUserAccess';
 import {
   PostPredictProcessRequest,
   PostPredictRequest,
 } from 'src/model/api/Predict';
-import { ImageEntity } from 'src/model/ImageEntity';
+import { ImageEntity } from 'src/model/db/ImageEntity';
+import { BadRequestError } from 'src/model/error';
 import { ReplicateResponse } from 'src/model/Replicate';
 import { compare } from 'src/util/compare';
 
@@ -23,6 +25,9 @@ export class PredictService {
   @inject(ImageAccess)
   private readonly imageAccess!: ImageAccess;
 
+  @inject(ViewUserAccess)
+  private readonly viewUserAccess!: ViewUserAccess;
+
   @inject(S3)
   private readonly s3!: S3;
 
@@ -30,11 +35,28 @@ export class PredictService {
     await this.dbAccess.cleanup();
   }
 
+  private async getCount(userId: string) {
+    const user = await this.viewUserAccess.findById(userId);
+    const mathCount = user.avg
+      ? Math.ceil(user.quota / user.avg)
+      : Math.ceil(user.quota / 10);
+
+    return mathCount > 10 ? 10 : mathCount;
+  }
+
+  private async validateUser(userId: string, count: number) {
+    const userCount = await this.getCount(userId);
+    if (count > userCount) throw new BadRequestError('too many input images');
+  }
+
   public async predictImages(data: PostPredictRequest, userId: string) {
-    const buffer = Buffer.from(data.image, 'base64');
-    const fileType = await fileTypeFromBuffer(buffer);
+    await this.validateUser(userId, data.images.length);
+
     try {
       await this.dbAccess.startTransaction();
+
+      const buffer = Buffer.from(data.images[0], 'base64');
+      const fileType = await fileTypeFromBuffer(buffer);
 
       const image = new ImageEntity();
       image.userId = userId;

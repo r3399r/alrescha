@@ -66,15 +66,15 @@ const main = async () => {
         },
         action: {
           type: 'postback',
-          data: 'query',
-          text: '進度查詢',
+          data: 'faq',
+          text: '常見問題',
         },
       },
     ],
   });
   await client.setRichMenuImage(
     id,
-    fs.createReadStream('./src/richmenu/menu.PNG')
+    fs.createReadStream('./src/richmenu/menu.png')
   );
   await client.setDefaultRichMenu(id);
 };

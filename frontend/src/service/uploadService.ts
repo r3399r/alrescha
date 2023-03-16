@@ -6,8 +6,9 @@ import { file2Base64 } from 'src/util/fileConverter';
 export const getUserInfo = async () => {
   const profile = await liff.getProfile();
   const token = liff.getAccessToken() ?? 'xx';
+  const os = liff.getOS();
 
-  return { profile, token };
+  return { profile, token, os };
 };
 
 export const startPredict = async (files: FileList, userId: string) => {

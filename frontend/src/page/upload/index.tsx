@@ -6,11 +6,16 @@ import Divider from 'src/component/Divider';
 import Input from 'src/component/Input';
 import Slider from 'src/component/Slider';
 import Switch from 'src/component/Switch';
+import Body from 'src/component/typography/Body';
+import H3 from 'src/component/typography/H3';
+import H5 from 'src/component/typography/H5';
+import IcAdd from 'src/image/ic-add.svg';
 import IcDelete from 'src/image/ic-delete.svg';
 import { getUserInfo } from 'src/service/uploadService';
 
 const Upload = () => {
   const [profile, setProfile] = useState<Profile>();
+  const [os, setOs] = useState<'ios' | 'android' | 'web' | undefined>();
   const [fileList, setFileList] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fidelity, setFidelity] = useState<string>('0.7');
@@ -21,6 +26,7 @@ const Upload = () => {
   useEffect(() => {
     liff.ready.then(getUserInfo).then((res) => {
       setProfile(res.profile);
+      setOs(res.os);
     });
     document.title = '上傳圖片';
   }, []);
@@ -32,42 +38,37 @@ const Upload = () => {
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) setFileList(Array.from(e.target.files));
+    if (e.target.files) setFileList([...fileList, ...Array.from(e.target.files)]);
   };
 
   return (
     <div className="mx-[15px] mt-[10px]">
       <div className="text-[14px]">
-        <div>
+        <Body>
           <span className="text-blue">{profile?.displayName}</span> 的免費運算額度還有{' '}
           <span className="text-blue">600</span> 秒
-        </div>
-        <div>
+        </Body>
+        <Body>
           批次上傳照片數量上限：<span className="text-blue">10</span> 張
-        </div>
+          {fileList.length > 0 && (
+            <span>
+              ，目前已上傳 <span className="text-blue">{fileList.length}</span> 張
+            </span>
+          )}
+        </Body>
       </div>
       {fileList.length === 0 && (
-        <>
-          <div className="mt-10 text-center">
-            <Button type="button" onClick={() => fileInputRef.current?.click()}>
-              上傳照片
-            </Button>
-          </div>
-          <input
-            type="file"
-            onChange={handleChange}
-            ref={fileInputRef}
-            className="hidden"
-            accept="image/png,image/jpeg"
-            multiple
-          />
-        </>
+        <div className="mt-10 text-center">
+          <Button type="button" onClick={() => fileInputRef.current?.click()}>
+            上傳照片
+          </Button>
+        </div>
       )}
       {fileList.length > 0 && (
-        <div>
+        <>
           <div className="overflow-x-scroll whitespace-nowrap mt-[10px] pb-10 scrollbar-hide">
             {fileList.map((file, i) => (
-              <div className="inline-block h-[260px] mr-[10px] relative overflow-hidden" key={i}>
+              <div className="inline-block h-[260px] mr-[10px] relative" key={i}>
                 <img className="h-full max-w-none" src={URL.createObjectURL(file)} />
                 <img
                   className="absolute right-[10px] bottom-[10px] cursor-pointer"
@@ -76,10 +77,18 @@ const Upload = () => {
                 />
               </div>
             ))}
+            {fileList.length < 10 && (
+              <div
+                className="inline-block h-[260px] w-[70px] mr-[10px] bg-grey-200 relative p-4"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <img src={IcAdd} className="absolute top-[112px]" />
+              </div>
+            )}
           </div>
           <Divider />
-          <div className="text-xl font-bold mt-[30px]">修圖設定</div>
-          <div className="text-[14px] mt-6 font-bold">保真度</div>
+          <H3 className="mt-[30px]">修圖設定</H3>
+          <H5 className="mt-6">保真度</H5>
           <div className="flex gap-10">
             <Slider
               value={Number(fidelity)}
@@ -100,23 +109,21 @@ const Upload = () => {
           <div className="text-grey-600 text-[12px] leading-[18px] mt-[5px]">
             Balance the quality (lower number) and fidelity (higher number). (maximum: 1)
           </div>
-          <div className="text-[14px] mt-6 font-bold">背景增強</div>
+          <H5 className="mt-6">背景增強</H5>
           <div className="flex items-center">
-            <div className="flex-1 text-grey-600 text-[12px] leading-[18px]">
+            <Body size="s" className="flex-1 text-grey-600">
               運用 Real-ESRGAN 來增強背景
-            </div>
+            </Body>
             <Switch checked={bgEnhance} onChange={(e) => setBgEnhance(e.target.checked)} />
           </div>
-          <div className="text-[14px] mt-6 font-bold">臉部上取樣</div>
+          <H5 className="mt-6">臉部上取樣</H5>
           <div className="flex items-center">
-            <div className="flex-1 text-grey-600 text-[12px] leading-[18px]">提高臉部解析度</div>
+            <Body className="flex-1 text-grey-600">提高臉部解析度</Body>
             <Switch checked={faceUpsample} onChange={(e) => setFaceUpsample(e.target.checked)} />
           </div>
-          <div className="text-[14px] mt-6 font-bold">圖片放大</div>
+          <H5 className="mt-6">圖片放大</H5>
           <div className="flex items-center">
-            <div className="flex-1 text-grey-600 text-[12px] leading-[18px]">
-              圖片長寬放大為原始圖片的倍數
-            </div>
+            <Body className="flex-1 text-grey-600">圖片長寬放大為原始圖片的倍數</Body>
             <Input
               className="w-[40px]"
               value={upscale}
@@ -132,8 +139,16 @@ const Upload = () => {
               送出
             </Button>
           </div>
-        </div>
+        </>
       )}
+      <input
+        type="file"
+        onChange={handleChange}
+        ref={fileInputRef}
+        className="hidden"
+        accept="image/png,image/jpeg"
+        multiple={os !== 'android'}
+      />
     </div>
   );
 };

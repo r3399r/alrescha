@@ -1,0 +1,8 @@
+CREATE TABLE "user" (
+	id STRING NOT NULL,
+	name STRING NOT NULL,
+	quota FLOAT NOT NULL,
+	date_created TIMESTAMP NULL,
+	date_updated TIMESTAMP NULL,
+	PRIMARY KEY (id ASC)
+);

@@ -1,7 +1,7 @@
 import { ReplicateResponse } from 'src/model/Replicate';
 
 export type PostPredictRequest = {
-  image: string;
+  images: string[];
 };
 
 export type PostPredictProcessRequest = ReplicateResponse;

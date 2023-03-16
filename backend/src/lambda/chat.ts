@@ -12,7 +12,6 @@ export async function chat(event: LambdaEvent, _context?: LambdaContext) {
       channelAccessToken: String(process.env.CHANNEL_TOKEN),
       channelSecret: String(process.env.CHANNEL_SECRET),
     });
-    console.log(event);
     service = bindings.get(ChatService);
 
     if (event.body === null)
@@ -20,8 +19,8 @@ export async function chat(event: LambdaEvent, _context?: LambdaContext) {
 
     const ev = JSON.parse(event.body) as WebhookRequestBody;
 
-    if (ev.events[0].type === 'postback')
-      await service.postbackReply(ev.events[0]);
+    if (ev.events[0].type === 'postback') await service.postback(ev.events[0]);
+    if (ev.events[0].type === 'follow') await service.follow(ev.events[0]);
   } catch (e) {
     console.error(e);
   } finally {

@@ -1,31 +1,31 @@
 import { inject, injectable } from 'inversify';
-import { Image } from 'src/model/db/Image';
-import { ImageEntity } from 'src/model/db/ImageEntity';
+import { User } from 'src/model/db/User';
+import { UserEntity } from 'src/model/db/UserEntity';
 import { BadRequestError } from 'src/model/error';
 import { Database } from 'src/util/Database';
 
 /**
- * Access class for Image model.
+ * Access class for User model.
  */
 @injectable()
-export class ImageAccess {
+export class UserAccess {
   @inject(Database)
   private readonly database!: Database;
 
-  public async save(input: Image) {
+  public async save(input: User) {
     const qr = await this.database.getQueryRunner();
-    const entity = new ImageEntity();
+    const entity = new UserEntity();
     Object.assign(entity, input);
 
     return await qr.manager.save(entity);
   }
 
-  public async update(input: Image) {
+  public async update(input: User) {
     const qr = await this.database.getQueryRunner();
-    const entity = new ImageEntity();
+    const entity = new UserEntity();
     Object.assign(entity, input);
 
-    const res = await qr.manager.update(ImageEntity, { id: input.id }, entity);
+    const res = await qr.manager.update(UserEntity, { id: input.id }, entity);
 
     if (res.affected === 0) throw new BadRequestError('nothing happened.');
   }
@@ -33,16 +33,8 @@ export class ImageAccess {
   public async findById(id: string) {
     const qr = await this.database.getQueryRunner();
 
-    return await qr.manager.findOneByOrFail<Image>(ImageEntity.name, {
+    return await qr.manager.findOneBy<User>(UserEntity.name, {
       id,
-    });
-  }
-
-  public async findByUserId(userId: string) {
-    const qr = await this.database.getQueryRunner();
-
-    return await qr.manager.findBy<Image>(ImageEntity.name, {
-      userId,
     });
   }
 }
