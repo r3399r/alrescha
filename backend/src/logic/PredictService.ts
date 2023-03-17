@@ -11,7 +11,6 @@ import {
 } from 'src/model/api/Predict';
 import { ViewUser } from 'src/model/db/ViewUser';
 import { BadRequestError } from 'src/model/error';
-import { compare } from 'src/util/compare';
 import { getCount } from 'src/util/userCountHelper';
 
 /**
@@ -66,22 +65,6 @@ export class PredictService {
         .promise();
   }
 
-  public async getPredictUrl(userId: string) {
-    const bucket = `${process.env.PROJECT}-${process.env.ENVR}-predict`;
-
-    const list = await this.s3.listObjects({ Bucket: bucket }).promise();
-
-    return (list.Contents ?? [])
-      .filter((v) => v.Key?.startsWith(userId + '/'))
-      .sort(compare('LastModified'))
-      .map((v) =>
-        this.s3.getSignedUrl('getObject', {
-          Bucket: bucket,
-          Key: v.Key,
-        })
-      );
-  }
-
   public async completePredict(
     data: PostPredictProcessRequest,
     imageId: string,
@@ -104,7 +87,7 @@ export class PredictService {
     user.quota = user.quota + 10 - data.metrics.predict_time;
     await this.userAccess.save(user);
 
-    const filename = `${userId}/${imageId}-b.${fileExt}`;
+    const filename = `${userId}/${imageId}.after.${fileExt}`;
     const bucket = `${process.env.PROJECT}-${process.env.ENVR}-predict`;
 
     await this.s3

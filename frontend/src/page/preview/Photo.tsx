@@ -3,7 +3,12 @@ import { useState } from 'react';
 import H4 from 'src/component/typography/H4';
 import Loading from './Loading';
 
-const Photo = () => {
+type Props = {
+  before: string | null;
+  after: string | null;
+};
+
+const Photo = ({ before, after }: Props) => {
   const [tab, setTab] = useState<number>(1);
 
   return (
@@ -28,10 +33,8 @@ const Photo = () => {
           修圖後
         </H4>
       </div>
-      {tab === 0 && (
-        <img src="https://avatars.githubusercontent.com/u/8167063?s=96&v=4" className="w-full" />
-      )}
-      {tab === 1 && <Loading />}
+      {tab === 0 && (before ? <img src={before} className="w-full" /> : <Loading />)}
+      {tab === 1 && (after ? <img src={after} className="w-full" /> : <Loading />)}
     </div>
   );
 };

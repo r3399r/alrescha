@@ -14,6 +14,7 @@ import H5 from 'src/component/typography/H5';
 import IcAdd from 'src/image/ic-add.svg';
 import IcDelete from 'src/image/ic-delete.svg';
 import { getUserInfo, startPredict } from 'src/service/uploadService';
+import { bnFormat } from 'src/util/bignumber';
 
 const Upload = () => {
   const navigate = useNavigate();
@@ -77,7 +78,7 @@ const Upload = () => {
               'text-red': quota && quota <= 0,
             })}
           >
-            {quota}
+            {quota ? bnFormat(quota, 2) : 0}
           </span>{' '}
           秒
         </Body>

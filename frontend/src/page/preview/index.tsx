@@ -1,10 +1,12 @@
 import liff from '@line/liff';
 import { useEffect, useState } from 'react';
-import { getUserProfile } from 'src/service/previewService';
+import { GetUserIdPredictResponse } from 'src/model/Api';
+import { getPredictOfUser, getUserProfile } from 'src/service/previewService';
 import Photo from './Photo';
 
 const Preview = () => {
   const [userId, setUserId] = useState<string>();
+  const [results, setResults] = useState<GetUserIdPredictResponse>();
 
   useEffect(() => {
     liff.ready.then(getUserProfile).then((res) => {
@@ -15,15 +17,16 @@ const Preview = () => {
 
   useEffect(() => {
     if (!userId) return;
-    // predictEndpoint.getPredict(userId).then((res) => {
-    //   setBefores(res.data.filter((o) => o.includes('before')));
-    //   setAfters(res.data.filter((o) => o.includes('after')));
-    // });
+    getPredictOfUser(userId).then((res) => {
+      setResults(res);
+    });
   }, [userId]);
 
   return (
     <div className="mt-[10px] mx-[15px]">
-      <Photo />
+      {results?.map((v) => (
+        <Photo key={v.id} before={v.before} after={v.after} />
+      ))}
     </div>
   );
 };

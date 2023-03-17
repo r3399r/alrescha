@@ -13,8 +13,6 @@ export async function predict(
   event: LambdaEvent,
   _context?: LambdaContext
 ): Promise<LambdaOutput> {
-  console.log(event);
-
   let service: PredictService | null = null;
 
   BindingsHelper.bindClientConfig({

@@ -9,8 +9,6 @@ export async function user(
   event: LambdaEvent,
   _context?: LambdaContext
 ): Promise<LambdaOutput> {
-  console.log(event);
-
   let service: UserService | null = null;
 
   BindingsHelper.bindClientConfig({
@@ -25,6 +23,9 @@ export async function user(
     switch (event.resource) {
       case '/api/user/{id}':
         res = await apiUserId(event, service);
+        break;
+      case '/api/user/{id}/predict':
+        res = await apiUserIdPredict(event, service);
         break;
       default:
         throw new InternalServerError('unknown resource');
@@ -46,7 +47,19 @@ async function apiUserId(event: LambdaEvent, service: UserService) {
       if (event.pathParameters === null)
         throw new BadRequestError('pathParameters should not be empty');
 
-      return service.getUserStatus(event.pathParameters.userId);
+      return service.getUserStatus(event.pathParameters.id);
+    default:
+      throw new InternalServerError('unknown http method');
+  }
+}
+
+async function apiUserIdPredict(event: LambdaEvent, service: UserService) {
+  switch (event.httpMethod) {
+    case 'GET':
+      if (event.pathParameters === null)
+        throw new BadRequestError('pathParameters should not be empty');
+
+      return service.getPredictUrl(event.pathParameters.id);
     default:
       throw new InternalServerError('unknown http method');
   }

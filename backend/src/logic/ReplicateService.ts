@@ -50,7 +50,7 @@ export class ReplicateService {
 
       const newImage = await this.imageAccess.save(image);
 
-      const filename = `${event.userId}/${newImage.id}-a.${fileType?.ext}`;
+      const filename = `${event.userId}/${newImage.id}.before.${fileType?.ext}`;
       const bucket = `${process.env.PROJECT}-${process.env.ENVR}-predict`;
 
       await this.s3
