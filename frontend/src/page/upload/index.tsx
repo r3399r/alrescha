@@ -1,5 +1,6 @@
 import { Profile } from '@liff/get-profile';
 import liff from '@line/liff';
+import classNames from 'classnames';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from 'src/component/Button';
@@ -44,7 +45,11 @@ const Upload = () => {
   };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) setFileList([...fileList, ...Array.from(e.target.files)]);
+    if (e.target.files && count) {
+      const newFiles = [...fileList, ...Array.from(e.target.files)];
+      if (newFiles.length > count) setFileList(newFiles.slice(0, 10));
+      else setFileList(newFiles);
+    }
   };
 
   const onSend = () => {
@@ -66,7 +71,15 @@ const Upload = () => {
       <div className="text-[14px]">
         <Body>
           <span className="text-blue">{profile.displayName}</span> 的免費運算額度還有{' '}
-          <span className="text-blue">{quota}</span> 秒
+          <span
+            className={classNames({
+              'text-blue': quota && quota > 0,
+              'text-red': quota && quota <= 0,
+            })}
+          >
+            {quota}
+          </span>{' '}
+          秒
         </Body>
         <Body>
           批次上傳照片數量上限：<span className="text-blue">{count}</span> 張
@@ -79,7 +92,11 @@ const Upload = () => {
       </div>
       {fileList.length === 0 && (
         <div className="mt-10 text-center">
-          <Button type="button" onClick={() => fileInputRef.current?.click()}>
+          <Button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={quota !== undefined && quota <= 0}
+          >
             上傳照片
           </Button>
         </div>

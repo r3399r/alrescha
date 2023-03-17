@@ -3,6 +3,7 @@ import axios from 'axios';
 import { inject, injectable } from 'inversify';
 import { DbAccess } from 'src/access/DbAccess';
 import { ImageAccess } from 'src/access/ImageAccess';
+import { UserAccess } from 'src/access/UserAccess';
 import { ViewUserAccess } from 'src/access/ViewUserAccess';
 import {
   PostPredictProcessRequest,
@@ -26,6 +27,9 @@ export class PredictService {
 
   @inject(ViewUserAccess)
   private readonly viewUserAccess!: ViewUserAccess;
+
+  @inject(UserAccess)
+  private readonly userAccess!: UserAccess;
 
   @inject(S3)
   private readonly s3!: S3;
@@ -93,6 +97,12 @@ export class PredictService {
     await this.imageAccess.save(image);
 
     const userId = image.userId;
+
+    const user = await this.userAccess.findById(userId);
+    if (user === null) throw new BadRequestError('no user found');
+
+    user.quota = user.quota + 10 - data.metrics.predict_time;
+    await this.userAccess.save(user);
 
     const filename = `${userId}/${imageId}-b.${fileExt}`;
     const bucket = `${process.env.PROJECT}-${process.env.ENVR}-predict`;

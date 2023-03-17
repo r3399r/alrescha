@@ -1,5 +1,4 @@
-CREATE VIEW V_USER AS
-with tmp as (
+CREATE VIEW V_USER as with tmp as (
     select user_id,
         avg(predict_time) as avg,
         count(*) as count
@@ -11,5 +10,5 @@ select u.id,
     u.quota,
     t.avg,
     t.count
-from tmp t
-    left join "user" u on t.user_id = u.id;
+from "user" u
+    left join tmp t on t.user_id = u.id;
