@@ -1,4 +1,4 @@
-import { S3 } from 'aws-sdk';
+import { Lambda, S3 } from 'aws-sdk';
 import { Container } from 'inversify';
 import 'reflect-metadata';
 import { DbAccess } from './access/DbAccess';
@@ -7,6 +7,8 @@ import { UserAccess } from './access/UserAccess';
 import { ViewUserAccess } from './access/ViewUserAccess';
 import { ChatService } from './logic/ChatService';
 import { PredictService } from './logic/PredictService';
+import { ReplicateService } from './logic/ReplicateService';
+import { UserService } from './logic/UserService';
 import { ImageEntity } from './model/db/ImageEntity';
 import { UserEntity } from './model/db/UserEntity';
 import { ViewUserEntity } from './model/db/ViewUserEntity';
@@ -30,8 +32,11 @@ container.bind<ViewUserAccess>(ViewUserAccess).toSelf();
 // service
 container.bind<ChatService>(ChatService).toSelf();
 container.bind<PredictService>(PredictService).toSelf();
+container.bind<ReplicateService>(ReplicateService).toSelf();
+container.bind<UserService>(UserService).toSelf();
 
 // AWS
+container.bind<Lambda>(Lambda).toDynamicValue(() => new Lambda());
 container.bind<S3>(S3).toDynamicValue(() => new S3());
 
 export { container as bindings };

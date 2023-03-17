@@ -78,13 +78,17 @@ Resources:
               }
             },
             "/api/predict": {
-              "get": {
-                "parameters": [{
-                  "name": "userId",
-                  "in": "query",
-                  "required": true,
-                  "type": "string"
-                }],
+              "post": {
+                "requestBody": {
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/postPredict"
+                      }
+                    }
+                  },
+                  "required": true
+                },
                 "responses": {
                   "200": {
                     "description": "200 response",
@@ -117,11 +121,13 @@ Resources:
                   "passthroughBehavior": "when_no_match",
                   "contentHandling": "CONVERT_TO_TEXT"
                 }
-              },
-              "post": {
+              }
+            },
+            "/api/user/{id}": {
+              "get": {
                 "parameters": [{
-                  "name": "userId",
-                  "in": "query",
+                  "name": "id",
+                  "in": "path",
                   "required": true,
                   "type": "string"
                 }],
@@ -145,7 +151,7 @@ Resources:
                 "x-amazon-apigateway-integration": {
                   "type": "aws_proxy",
                   "httpMethod": "POST",
-                  "uri": !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:278497686406:function:${Project}-${TargetEnvr}-predict/invocations",
+                  "uri": !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:278497686406:function:${Project}-${TargetEnvr}-user/invocations",
                   "responses": {
                     "default": {
                       "statusCode": "200",
@@ -212,7 +218,19 @@ Resources:
             "Empty": {
               "type": "object",
               "title": "Empty Schema"
-            }
+            },
+            "postPredict": {
+              "type": "object",
+              "properties": {
+                "images": { "type": "array", "items": {"type": "string"}},
+                "userId": {"type": "string"},
+                "codeformerFidelity":{"type":"number"},
+                "backgroundEnhance":{"type":"boolean"},
+                "faceUpsample":{"type":"boolean"},
+                "upscale":{"type":"number"}
+              },
+              "required": ["images","userId","codeformerFidelity","backgroundEnhance","faceUpsample","upscale"]
+            },
           },
           "x-amazon-apigateway-request-validators" : {
             "Validate body, query string parameters, and headers" : {
@@ -273,6 +291,50 @@ Resources:
           DB_USER: !Sub '{{resolve:ssm:${TargetEnvr}-db-user:1}}'
           CHANNEL_TOKEN: !Sub '{{resolve:ssm:${Project}-${TargetEnvr}-line-token:1}}'
           LIFF_ID: !Sub '{{resolve:ssm:${Project}-${TargetEnvr}-liff:1}}'
+  LambdaUser:
+    Type: AWS::Serverless::Function
+    Properties:
+      Architectures: [arm64]
+      Handler: index.user
+      Runtime: !Sub ${NodeJsVer}
+      FunctionName: !Sub ${Project}-${TargetEnvr}-user
+      Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/${LambdaExecutionRole}"
+      CodeUri: ../../dist/webpack/lambda
+      MemorySize: 128
+      Environment:
+        Variables:
+          PROJECT: !Sub ${Project}
+          ENVR: !Sub ${TargetEnvr}
+          DB_CLUSTER: !Sub '{{resolve:ssm:${TargetEnvr}-db-cluster:1}}'
+          DB_HOST: !Sub '{{resolve:ssm:${TargetEnvr}-db-host:1}}'
+          DB_PWD: !Sub '{{resolve:ssm:${TargetEnvr}-db-pwd:1}}'
+          DB_USER: !Sub '{{resolve:ssm:${TargetEnvr}-db-user:1}}'
+  InvokePermissionUser:
+    Type: AWS::Lambda::Permission
+    DependsOn: [ServerlessApi, LambdaUser]
+    Properties:
+      FunctionName: !Sub ${Project}-${TargetEnvr}-user
+      Action: 'lambda:InvokeFunction'
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ServerlessApi}/*
+  LambdaReplicate:
+    Type: AWS::Serverless::Function
+    Properties:
+      Architectures: [arm64]
+      Handler: index.replicate
+      Runtime: !Sub ${NodeJsVer}
+      FunctionName: !Sub ${Project}-${TargetEnvr}-replicate
+      Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/${LambdaExecutionRole}"
+      CodeUri: ../../dist/webpack/lambda
+      MemorySize: 128
+      Environment:
+        Variables:
+          PROJECT: !Sub ${Project}
+          ENVR: !Sub ${TargetEnvr}
+          DB_CLUSTER: !Sub '{{resolve:ssm:${TargetEnvr}-db-cluster:1}}'
+          DB_HOST: !Sub '{{resolve:ssm:${TargetEnvr}-db-host:1}}'
+          DB_PWD: !Sub '{{resolve:ssm:${TargetEnvr}-db-pwd:1}}'
+          DB_USER: !Sub '{{resolve:ssm:${TargetEnvr}-db-user:1}}'
           REPLICATE_TOKEN: !Sub '{{resolve:ssm:${Project}-${TargetEnvr}-replicate-token:1}}'
   InvokePermissionPredict:
     Type: AWS::Lambda::Permission

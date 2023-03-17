@@ -1,6 +1,7 @@
 import { Profile } from '@liff/get-profile';
 import liff from '@line/liff';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Button from 'src/component/Button';
 import Divider from 'src/component/Divider';
 import Input from 'src/component/Input';
@@ -11,10 +12,13 @@ import H3 from 'src/component/typography/H3';
 import H5 from 'src/component/typography/H5';
 import IcAdd from 'src/image/ic-add.svg';
 import IcDelete from 'src/image/ic-delete.svg';
-import { getUserInfo } from 'src/service/uploadService';
+import { getUserInfo, startPredict } from 'src/service/uploadService';
 
 const Upload = () => {
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile>();
+  const [quota, setQuota] = useState<number>();
+  const [count, setCount] = useState<number>();
   const [os, setOs] = useState<'ios' | 'android' | 'web' | undefined>();
   const [fileList, setFileList] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -27,6 +31,8 @@ const Upload = () => {
     liff.ready.then(getUserInfo).then((res) => {
       setProfile(res.profile);
       setOs(res.os);
+      setQuota(res.quota);
+      setCount(res.count);
     });
     document.title = '上傳圖片';
   }, []);
@@ -41,15 +47,29 @@ const Upload = () => {
     if (e.target.files) setFileList([...fileList, ...Array.from(e.target.files)]);
   };
 
+  const onSend = () => {
+    if (profile === undefined) return;
+    startPredict(
+      fileList,
+      profile.userId,
+      Number(fidelity),
+      bgEnhance,
+      faceUpsample,
+      Number(upscale),
+    ).then(() => navigate('/preview'));
+  };
+
+  if (profile === undefined) return <div />;
+
   return (
     <div className="mx-[15px] mt-[10px]">
       <div className="text-[14px]">
         <Body>
-          <span className="text-blue">{profile?.displayName}</span> 的免費運算額度還有{' '}
-          <span className="text-blue">600</span> 秒
+          <span className="text-blue">{profile.displayName}</span> 的免費運算額度還有{' '}
+          <span className="text-blue">{quota}</span> 秒
         </Body>
         <Body>
-          批次上傳照片數量上限：<span className="text-blue">10</span> 張
+          批次上傳照片數量上限：<span className="text-blue">{count}</span> 張
           {fileList.length > 0 && (
             <span>
               ，目前已上傳 <span className="text-blue">{fileList.length}</span> 張
@@ -135,7 +155,7 @@ const Upload = () => {
             <Button type="button" onClick={() => setFileList([])}>
               重置
             </Button>
-            <Button appearance="secondary" type="button">
+            <Button appearance="secondary" type="button" onClick={onSend}>
               送出
             </Button>
           </div>

@@ -74,7 +74,7 @@ const main = async () => {
   });
   await client.setRichMenuImage(
     id,
-    fs.createReadStream('./src/richmenu/menu.png')
+    fs.createReadStream('./src/richmenu/image.png')
   );
   await client.setDefaultRichMenu(id);
 };

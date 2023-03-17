@@ -1,6 +1,5 @@
-import { S3 } from 'aws-sdk';
+import { Lambda, S3 } from 'aws-sdk';
 import axios from 'axios';
-import { fileTypeFromBuffer } from 'file-type';
 import { inject, injectable } from 'inversify';
 import { DbAccess } from 'src/access/DbAccess';
 import { ImageAccess } from 'src/access/ImageAccess';
@@ -9,13 +8,13 @@ import {
   PostPredictProcessRequest,
   PostPredictRequest,
 } from 'src/model/api/Predict';
-import { ImageEntity } from 'src/model/db/ImageEntity';
+import { ViewUser } from 'src/model/db/ViewUser';
 import { BadRequestError } from 'src/model/error';
-import { ReplicateResponse } from 'src/model/Replicate';
 import { compare } from 'src/util/compare';
+import { getCount } from 'src/util/userCountHelper';
 
 /**
- * Service class for
+ * Service class for predict lambda
  */
 @injectable()
 export class PredictService {
@@ -31,85 +30,36 @@ export class PredictService {
   @inject(S3)
   private readonly s3!: S3;
 
+  @inject(Lambda)
+  private readonly lambda!: Lambda;
+
   public async cleanup() {
     await this.dbAccess.cleanup();
   }
 
-  private async getCount(userId: string) {
-    const user = await this.viewUserAccess.findById(userId);
-    const mathCount = user.avg
-      ? Math.ceil(user.quota / user.avg)
-      : Math.ceil(user.quota / 10);
-
-    return mathCount > 10 ? 10 : mathCount;
-  }
-
-  private async validateUser(userId: string, count: number) {
-    const userCount = await this.getCount(userId);
+  private async validateUser(user: ViewUser, count: number) {
+    const userCount = getCount(user);
     if (count > userCount) throw new BadRequestError('too many input images');
   }
 
-  public async predictImages(data: PostPredictRequest, userId: string) {
-    await this.validateUser(userId, data.images.length);
+  public async predictImages(data: PostPredictRequest) {
+    const user = await this.viewUserAccess.findById(data.userId);
+    await this.validateUser(user, data.images.length);
 
-    try {
-      await this.dbAccess.startTransaction();
-
-      const buffer = Buffer.from(data.images[0], 'base64');
-      const fileType = await fileTypeFromBuffer(buffer);
-
-      const image = new ImageEntity();
-      image.userId = userId;
-      image.status = 'created';
-
-      const newImage = await this.imageAccess.save(image);
-
-      const filename = `${userId}/${newImage.id}-a.${fileType?.ext}`;
-      const bucket = `${process.env.PROJECT}-${process.env.ENVR}-predict`;
-
-      await this.s3
-        .putObject({
-          Body: buffer,
-          Bucket: bucket,
-          Key: filename,
+    for (const i of data.images)
+      await this.lambda
+        .invoke({
+          FunctionName: `${process.env.PROJECT}-${process.env.ENVR}-replicate`,
+          Payload: JSON.stringify({
+            image: i,
+            userId: data.userId,
+            codeformerFidelity: data.codeformerFidelity,
+            backgroundEnhance: data.backgroundEnhance,
+            faceUpsample: data.faceUpsample,
+            upscale: data.upscale,
+          }),
         })
         .promise();
-
-      const url = this.s3.getSignedUrl('getObject', {
-        Bucket: bucket,
-        Key: filename,
-      });
-
-      const replicateResponse = await axios.request<ReplicateResponse>({
-        data: {
-          version:
-            '7de2ea26c616d5bf2245ad0d5e24f0ff9a6204578a5c876db53142edd9d2cd56',
-          input: { image: url },
-          webhook: `https://airepair${
-            process.env.ENVR === 'test' ? '-test' : ''
-          }.celestialstudio.net/api/predict/process?imageId=${
-            newImage.id
-          }&fileExt=${fileType?.ext}`,
-          webhook_events_filter: ['completed'],
-        },
-        headers: {
-          Authorization: `Token ${process.env.REPLICATE_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-        url: 'https://api.replicate.com/v1/predictions',
-        method: 'post',
-      });
-
-      newImage.predictId = replicateResponse.data.id;
-      await this.imageAccess.save(newImage);
-
-      await this.dbAccess.commitTransaction();
-
-      return replicateResponse;
-    } catch (e) {
-      await this.dbAccess.rollbackTransaction();
-      throw e;
-    }
   }
 
   public async getPredictUrl(userId: string) {
@@ -144,7 +94,7 @@ export class PredictService {
 
     const userId = image.userId;
 
-    const filename = `${userId}/${imageId}-after.${fileExt}`;
+    const filename = `${userId}/${imageId}-b.${fileExt}`;
     const bucket = `${process.env.PROJECT}-${process.env.ENVR}-predict`;
 
     await this.s3

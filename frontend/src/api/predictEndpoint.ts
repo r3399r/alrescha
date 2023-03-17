@@ -1,11 +1,9 @@
 import { PostPredictRequest } from 'src/model/Api';
-import { ReplicateResponse } from 'src/model/Replicate';
 import http from 'src/util/http';
 
-const postPredict = async (data: PostPredictRequest, userId: string) =>
-  await http.post<ReplicateResponse>('predict', {
+const postPredict = async (data: PostPredictRequest) =>
+  await http.post<void>('predict', {
     data,
-    params: { userId },
   });
 
 const getPredict = async (userId: string) =>

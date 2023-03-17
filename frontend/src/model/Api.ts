@@ -1,3 +1,13 @@
 export type PostPredictRequest = {
-  image: string;
+  images: string[];
+  userId: string;
+  codeformerFidelity: number;
+  backgroundEnhance: boolean;
+  faceUpsample: boolean;
+  upscale: number;
+};
+
+export type GetUserIdResponse = {
+  quota: number;
+  count: number;
 };
