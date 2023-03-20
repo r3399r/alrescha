@@ -16,5 +16,5 @@ export class ViewUserEntity implements ViewUser {
   avg: number | null = null;
 
   @ViewColumn()
-  count!: number;
+  count: number | null = null;
 }

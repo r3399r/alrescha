@@ -1,9 +1,6 @@
 import { bindings } from 'src/bindings';
 import { PredictService } from 'src/logic/PredictService';
-import {
-  PostPredictProcessRequest,
-  PostPredictRequest,
-} from 'src/model/api/Predict';
+import { PostPredictProcessRequest } from 'src/model/api/Predict';
 import { BadRequestError, InternalServerError } from 'src/model/error';
 import { LambdaContext, LambdaEvent, LambdaOutput } from 'src/model/Lambda';
 import { BindingsHelper } from 'src/util/BindingsHelper';
@@ -25,9 +22,9 @@ export async function predict(
     let res: unknown;
 
     switch (event.resource) {
-      case '/api/predict':
-        res = await apiPredict(event, service);
-        break;
+      // case '/api/predict':
+      //   res = await apiPredict(event, service);
+      //   break;
       case '/api/predict/process':
         res = await apiPredictProcess(event, service);
         break;
@@ -45,19 +42,19 @@ export async function predict(
   }
 }
 
-async function apiPredict(event: LambdaEvent, service: PredictService) {
-  switch (event.httpMethod) {
-    case 'POST':
-      if (event.body === null)
-        throw new BadRequestError('body should not be empty');
+// async function apiPredict(event: LambdaEvent, service: PredictService) {
+//   switch (event.httpMethod) {
+//     case 'POST':
+//       if (event.body === null)
+//         throw new BadRequestError('body should not be empty');
 
-      return service.predictImages(
-        JSON.parse(event.body) as PostPredictRequest
-      );
-    default:
-      throw new InternalServerError('unknown http method');
-  }
-}
+//       return service.predictImages(
+//         JSON.parse(event.body) as PostPredictRequest
+//       );
+//     default:
+//       throw new InternalServerError('unknown http method');
+//   }
+// }
 
 async function apiPredictProcess(event: LambdaEvent, service: PredictService) {
   if (event.queryStringParameters === null)
@@ -70,7 +67,8 @@ async function apiPredictProcess(event: LambdaEvent, service: PredictService) {
       return service.completePredict(
         JSON.parse(event.body) as PostPredictProcessRequest,
         event.queryStringParameters.imageId,
-        event.queryStringParameters.fileExt
+        event.queryStringParameters.fileExt,
+        event.queryStringParameters.replyToken
       );
     default:
       throw new InternalServerError('unknown http method');

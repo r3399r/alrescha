@@ -219,6 +219,11 @@ Resources:
                   "in": "query",
                   "required": true,
                   "type": "string"
+                }, {
+                  "name": "replyToken",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
                 }],
                 "responses": {
                   "200": {
@@ -304,6 +309,7 @@ Resources:
           DB_PWD: !Sub '{{resolve:ssm:${TargetEnvr}-db-pwd:1}}'
           DB_USER: !Sub '{{resolve:ssm:${TargetEnvr}-db-user:1}}'
           CHANNEL_TOKEN: !Sub '{{resolve:ssm:${Project}-${TargetEnvr}-line-token:1}}'
+          REPLICATE_TOKEN: !Sub '{{resolve:ssm:${Project}-${TargetEnvr}-replicate-token:1}}'
           LIFF_ID: !Sub '{{resolve:ssm:${Project}-${TargetEnvr}-liff:1}}'
   InvokePermissionChat:
     Type: AWS::Lambda::Permission
@@ -332,7 +338,6 @@ Resources:
           DB_PWD: !Sub '{{resolve:ssm:${TargetEnvr}-db-pwd:1}}'
           DB_USER: !Sub '{{resolve:ssm:${TargetEnvr}-db-user:1}}'
           CHANNEL_TOKEN: !Sub '{{resolve:ssm:${Project}-${TargetEnvr}-line-token:1}}'
-          LIFF_ID: !Sub '{{resolve:ssm:${Project}-${TargetEnvr}-liff:1}}'
   LambdaUser:
     Type: AWS::Serverless::Function
     Properties:

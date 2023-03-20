@@ -55,14 +55,14 @@ const Upload = () => {
 
   const onSend = () => {
     if (profile === undefined) return;
-    startPredict(
-      fileList,
-      profile.userId,
-      Number(fidelity),
-      bgEnhance,
-      faceUpsample,
-      Number(upscale),
-    ).then(() => navigate('/preview'));
+    // startPredict(
+    //   fileList,
+    //   profile.userId,
+    //   Number(fidelity),
+    //   bgEnhance,
+    //   faceUpsample,
+    //   Number(upscale),
+    // ).then(() => navigate('/preview'));
   };
 
   if (profile === undefined) return <div />;

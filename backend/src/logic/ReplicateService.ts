@@ -4,9 +4,7 @@ import { fileTypeFromBuffer } from 'file-type';
 import { inject, injectable } from 'inversify';
 import { DbAccess } from 'src/access/DbAccess';
 import { ImageAccess } from 'src/access/ImageAccess';
-import { UserAccess } from 'src/access/UserAccess';
 import { ImageEntity } from 'src/model/db/ImageEntity';
-import { BadRequestError } from 'src/model/error';
 import { CustomLambdaEvent } from 'src/model/Lambda';
 import { ReplicateResponse } from 'src/model/Replicate';
 
@@ -17,9 +15,6 @@ import { ReplicateResponse } from 'src/model/Replicate';
 export class ReplicateService {
   @inject(DbAccess)
   private readonly dbAccess!: DbAccess;
-
-  @inject(UserAccess)
-  private readonly userAccess!: UserAccess;
 
   @inject(ImageAccess)
   private readonly imageAccess!: ImageAccess;
@@ -34,12 +29,6 @@ export class ReplicateService {
   public async predictImages(event: CustomLambdaEvent) {
     try {
       await this.dbAccess.startTransaction();
-
-      const user = await this.userAccess.findById(event.userId);
-      if (user === null) throw new BadRequestError('no user found');
-
-      user.quota = user.quota - 10;
-      await this.userAccess.save(user);
 
       const buffer = Buffer.from(event.image, 'base64');
       const fileType = await fileTypeFromBuffer(buffer);

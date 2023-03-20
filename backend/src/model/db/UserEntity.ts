@@ -1,9 +1,10 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity, Generated } from 'typeorm';
 import { User } from './User';
 
 @Entity({ name: 'user' })
 export class UserEntity implements User {
   @Column({ primary: true })
+  @Generated('uuid')
   id!: string;
 
   @Column({ type: 'text' })

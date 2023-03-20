@@ -8,6 +8,7 @@ import { BindingsHelper } from 'src/util/BindingsHelper';
 export async function chat(event: LambdaEvent, _context?: LambdaContext) {
   let service: ChatService | null = null;
   try {
+    console.log(event);
     BindingsHelper.bindClientConfig({
       channelAccessToken: String(process.env.CHANNEL_TOKEN),
       channelSecret: String(process.env.CHANNEL_SECRET),
@@ -17,10 +18,13 @@ export async function chat(event: LambdaEvent, _context?: LambdaContext) {
     if (event.body === null)
       throw new BadRequestError('body should not be empty');
 
-    const ev = JSON.parse(event.body) as WebhookRequestBody;
+    const body = JSON.parse(event.body) as WebhookRequestBody;
 
-    if (ev.events[0].type === 'postback') await service.postback(ev.events[0]);
-    if (ev.events[0].type === 'follow') await service.follow(ev.events[0]);
+    for (const ev of body.events) {
+      if (ev.type === 'message') await service.message(ev);
+      if (ev.type === 'postback') await service.postback(ev);
+      if (ev.type === 'follow') await service.follow(ev);
+    }
   } catch (e) {
     console.error(e);
   } finally {

@@ -16,7 +16,7 @@ export class ImageEntity implements Image {
   @Column({ type: 'text', name: 'predict_id', default: null })
   predictId: string | null = null;
 
-  @Column({ type: 'text', name: 'predict_time', default: null })
+  @Column({ type: 'float', name: 'predict_time', default: null })
   predictTime: number | null = null;
 
   @Column({ type: 'timestamp', name: 'date_created', default: null })
