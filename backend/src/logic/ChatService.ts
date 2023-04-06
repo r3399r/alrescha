@@ -94,7 +94,7 @@ export class ChatService {
           action: {
             type: 'uri',
             label: '聯絡管理員',
-            uri: 'https://docs.google.com/forms/d/e/1FAIpQLSdaWAnpxINF4m1msJQT-Qr9yAyukZHlUQSoEpZktv0ZId0n0Q/viewform?usp=sf_link',
+            uri: 'https://lin.ee/WSkDSDF',
           },
         },
       ],
