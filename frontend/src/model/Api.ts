@@ -8,8 +8,15 @@ export type PostPredictRequest = {
 };
 
 export type GetUserIdResponse = {
+  id: string;
+  name: string;
   quota: number;
-  count: number;
+  codeformerFidelity: number;
+  backgroundEnhance: boolean;
+  faceUpsample: boolean;
+  upscale: number;
+  avg: number | null;
+  count: number | null;
 };
 
 export type GetUserIdPredictResponse = {
@@ -19,3 +26,10 @@ export type GetUserIdPredictResponse = {
   dateCreated: string | null;
   dateUpdated: string | null;
 }[];
+
+export type PutUserIdRequest = {
+  codeformerFidelity: number;
+  backgroundEnhance: boolean;
+  faceUpsample: boolean;
+  upscale: number;
+};

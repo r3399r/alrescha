@@ -8,6 +8,10 @@ CREATE VIEW V_USER as with tmp as (
 select u.id,
     u.name,
     u.quota,
+    u.codeformer_fidelity,
+    u.background_enhance,
+    u.face_upsample,
+    u.upscale,
     t.avg,
     t.count
 from "user" u

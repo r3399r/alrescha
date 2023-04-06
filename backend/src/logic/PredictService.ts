@@ -1,21 +1,14 @@
 import { Client } from '@line/bot-sdk';
-import { Lambda, S3 } from 'aws-sdk';
+import { S3 } from 'aws-sdk';
 import axios from 'axios';
 import { inject, injectable } from 'inversify';
 import { DbAccess } from 'src/access/DbAccess';
 import { ImageAccess } from 'src/access/ImageAccess';
 import { UserAccess } from 'src/access/UserAccess';
-import { ViewUserAccess } from 'src/access/ViewUserAccess';
 import { PRE_QUOTA } from 'src/constant/Quota';
-import {
-  PostPredictProcessRequest,
-  PostPredictRequest,
-} from 'src/model/api/Predict';
-import { UserEntity } from 'src/model/db/UserEntity';
-import { ViewUser } from 'src/model/db/ViewUser';
+import { PostPredictProcessRequest } from 'src/model/api/Predict';
 import { BadRequestError } from 'src/model/error';
 import { bn } from 'src/util/bignumber';
-import { getCount } from 'src/util/userCountHelper';
 import { ChatService } from './ChatService';
 
 /**
@@ -29,17 +22,11 @@ export class PredictService {
   @inject(ImageAccess)
   private readonly imageAccess!: ImageAccess;
 
-  @inject(ViewUserAccess)
-  private readonly viewUserAccess!: ViewUserAccess;
-
   @inject(UserAccess)
   private readonly userAccess!: UserAccess;
 
   @inject(S3)
   private readonly s3!: S3;
-
-  @inject(Lambda)
-  private readonly lambda!: Lambda;
 
   @inject(Client)
   private readonly client!: Client;
@@ -51,44 +38,12 @@ export class PredictService {
     await this.dbAccess.cleanup();
   }
 
-  private async validateUser(user: ViewUser, count: number) {
-    const userCount = getCount(user);
-    if (count > userCount) throw new BadRequestError('too many input images');
-  }
-
-  public async predictImages(data: PostPredictRequest) {
-    const viewUser = await this.viewUserAccess.findById(data.userId);
-    await this.validateUser(viewUser, data.images.length);
-
-    const user = new UserEntity();
-    user.id = viewUser.id;
-    user.name = viewUser.name;
-    user.quota = viewUser.quota - 10 * data.images.length;
-    await this.userAccess.update(user);
-
-    for (const i of data.images)
-      await this.lambda
-        .invoke({
-          FunctionName: `${process.env.PROJECT}-${process.env.ENVR}-replicate`,
-          Payload: JSON.stringify({
-            image: i,
-            userId: data.userId,
-            codeformerFidelity: data.codeformerFidelity,
-            backgroundEnhance: data.backgroundEnhance,
-            faceUpsample: data.faceUpsample,
-            upscale: data.upscale,
-          }),
-        })
-        .promise();
-  }
-
   public async completePredict(
     data: PostPredictProcessRequest,
     imageId: string,
     fileExt: string,
     replyToken: string
   ) {
-    console.log(data);
     const predictTime = bn(data.metrics.predict_time).dp(2, 2);
 
     const image = await this.imageAccess.findById(imageId);
@@ -124,7 +79,7 @@ export class PredictService {
         type: 'image',
         originalContentUrl: data.output,
         previewImageUrl: data.output,
-        quickReply: { items: this.chatService.getReplyItems() },
+        quickReply: this.chatService.getReplyItems(),
       });
     }
   }

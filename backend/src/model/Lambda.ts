@@ -57,12 +57,3 @@ export type CognitoEvent = {
   };
   response: unknown;
 };
-
-export type CustomLambdaEvent = {
-  image: string;
-  userId: string;
-  codeformerFidelity: number;
-  backgroundEnhance: boolean;
-  faceUpsample: boolean;
-  upscale: number;
-};

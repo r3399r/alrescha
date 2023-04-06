@@ -4,7 +4,7 @@ import {
   FollowEvent,
   MessageEvent,
   PostbackEvent,
-  QuickReplyItem,
+  QuickReply,
 } from '@line/bot-sdk';
 import { S3 } from 'aws-sdk';
 import axios from 'axios';
@@ -48,55 +48,57 @@ export class ChatService {
     await this.dbAccess.cleanup();
   }
 
-  public getReplyItems(): QuickReplyItem[] {
-    return [
-      {
-        type: 'action',
-        action: { type: 'cameraRoll', label: '上傳照片' },
-      },
-      {
-        type: 'action',
-        action: {
-          type: 'uri',
-          label: '瀏覽照片',
-          uri: `https://liff.line.me/${process.env.LIFF_ID}/preview`,
+  public getReplyItems(): QuickReply {
+    return {
+      items: [
+        {
+          type: 'action',
+          action: { type: 'cameraRoll', label: '上傳照片' },
         },
-      },
-      {
-        type: 'action',
-        action: {
-          type: 'postback',
-          label: '額度查詢',
-          displayText: '額度查詢',
-          data: 'quota',
+        {
+          type: 'action',
+          action: {
+            type: 'uri',
+            label: '瀏覽照片',
+            uri: `https://liff.line.me/${process.env.LIFF_ID}/preview`,
+          },
         },
-      },
-      {
-        type: 'action',
-        action: {
-          type: 'uri',
-          label: '參數設定',
-          uri: `https://liff.line.me/${process.env.LIFF_ID}/upload`,
+        {
+          type: 'action',
+          action: {
+            type: 'postback',
+            label: '額度查詢',
+            displayText: '額度查詢',
+            data: 'quota',
+          },
         },
-      },
-      {
-        type: 'action',
-        action: {
-          type: 'postback',
-          label: '常見問題',
-          displayText: '常見問題',
-          data: 'faq',
+        {
+          type: 'action',
+          action: {
+            type: 'uri',
+            label: '參數設定',
+            uri: `https://liff.line.me/${process.env.LIFF_ID}/setting`,
+          },
         },
-      },
-      {
-        type: 'action',
-        action: {
-          type: 'uri',
-          label: '聯絡管理員',
-          uri: 'https://docs.google.com/forms/d/e/1FAIpQLSdaWAnpxINF4m1msJQT-Qr9yAyukZHlUQSoEpZktv0ZId0n0Q/viewform?usp=sf_link',
+        {
+          type: 'action',
+          action: {
+            type: 'postback',
+            label: '常見問題',
+            displayText: '常見問題',
+            data: 'faq',
+          },
         },
-      },
-    ];
+        {
+          type: 'action',
+          action: {
+            type: 'uri',
+            label: '聯絡管理員',
+            uri: 'https://docs.google.com/forms/d/e/1FAIpQLSdaWAnpxINF4m1msJQT-Qr9yAyukZHlUQSoEpZktv0ZId0n0Q/viewform?usp=sf_link',
+          },
+        },
+      ],
+    };
   }
 
   public async follow(event: FollowEvent) {
@@ -115,6 +117,10 @@ export class ChatService {
       user.id = userId;
       user.name = profile.displayName;
       user.quota = 100;
+      user.codeformerFidelity = 0.7;
+      user.backgroundEnhance = true;
+      user.faceUpsample = true;
+      user.upscale = 1;
 
       await this.userAccess.save(user);
 
@@ -133,7 +139,7 @@ export class ChatService {
         {
           type: 'text',
           text: '100 秒的免費運算時數已送給您，請隨意使用！',
-          quickReply: { items: this.getReplyItems() },
+          quickReply: this.getReplyItems(),
         },
       ]);
       await this.dbAccess.commitTransaction();
@@ -150,11 +156,22 @@ export class ChatService {
 
       await this.client.replyMessage(event.replyToken, [
         {
-          type: 'text',
-          text: `目前額度: ${user.quota} 秒\n您已修復 ${
-            user.count
-          } 張圖，每張圖平均花費 ${bn(user.avg).dp(2).toNumber()} 秒`,
-          quickReply: { items: this.getReplyItems() },
+          type: 'template',
+          altText: '目前額度',
+          template: {
+            type: 'buttons',
+            text: `目前剩餘額度: ${user.quota} 秒\n您已修復 ${
+              user.count ?? 0
+            } 張圖\n每張圖平均花費 ${bn(user.avg).dp(2).toNumber()} 秒`,
+            actions: [
+              {
+                type: 'uri',
+                label: '如何取得更多額度？',
+                uri: `https://liff.line.me/${process.env.LIFF_ID}/quota`,
+              },
+            ],
+          },
+          quickReply: this.getReplyItems(),
         },
       ]);
     } else if (event.postback.data === 'faq')
@@ -164,46 +181,165 @@ export class ChatService {
           altText: '常見問題',
           template: {
             type: 'buttons',
-            text: '請選擇您的問題',
+            text: '請選擇問題',
             actions: [
-              { type: 'postback', label: '使用教學', data: 'tutorial' },
               {
                 type: 'postback',
-                label: '如何取得額度？',
-                data: 'increase-quota',
+                displayText: '上傳照片',
+                label: '上傳照片',
+                data: 'q-1',
               },
-              { type: 'postback', label: '如何生出圖的？', data: 'how' },
+              {
+                type: 'postback',
+                displayText: '瀏覽照片',
+                label: '瀏覽照片',
+                data: 'q-2',
+              },
+              {
+                type: 'postback',
+                displayText: '額度介紹',
+                label: '額度介紹',
+                data: 'q-3',
+              },
+              {
+                type: 'postback',
+                displayText: '原理介紹',
+                label: '原理介紹',
+                data: 'q-4',
+              },
             ],
           },
-          quickReply: { items: this.getReplyItems() },
+          quickReply: this.getReplyItems(),
         },
       ]);
-    else if (event.postback.data === 'tutorial')
+    else if (event.postback.data === 'q-1')
       await this.client.replyMessage(event.replyToken, [
         {
           type: 'text',
-          text: '教學，要提醒圖片僅暫存 3 天',
-          quickReply: { items: this.getReplyItems() },
+          text: '將照片傳送到聊天室，稍待幾秒，AI 修復師就會將修好的圖傳送回來。',
+        },
+        {
+          type: 'text',
+          text: '若原始圖片過大導致 AI 計算超過 1 分鐘，則不會從劉天是傳送結果回來，但仍可以在「瀏覽照片」中找到修好的圖',
+          quickReply: this.getReplyItems(),
         },
       ]);
-    else if (event.postback.data === 'increase-quota')
+    else if (event.postback.data === 'q-2')
       await this.client.replyMessage(event.replyToken, [
         {
           type: 'text',
-          text: '免費額度：追蹤即贈送 100 秒額度；若額度介於 0~20 秒，將於每日 00:00 新增至 20 秒；若額度為負，將於每日 00:00 新增 20 秒',
-        },
-        {
-          type: 'text',
-          text: '您也可以直接付費購買額度，1 元 xx 秒。\n請匯款至 1234-56778，或用 line pay money 轉帳，轉帳代碼：312340019e32\n\n匯款完成後請主動聯繫管理員進行對帳',
-          quickReply: { items: this.getReplyItems() },
+          text: '可至「瀏覽照片」看之前傳過的照片，圖檔只保存 3 天，超過將會自動刪除',
+          quickReply: this.getReplyItems(),
         },
       ]);
-    else if (event.postback.data === 'how')
+    else if (event.postback.data === 'q-3')
+      await this.client.replyMessage(event.replyToken, [
+        {
+          type: 'template',
+          altText: '額度介紹',
+          template: {
+            type: 'buttons',
+            text: '請選擇項目',
+            actions: [
+              {
+                type: 'postback',
+                displayText: '額度查詢',
+                label: '額度查詢',
+                data: 'q-3-1',
+              },
+              {
+                type: 'postback',
+                displayText: '我能擁有多少免費額度？',
+                label: '我能擁有多少免費額度？',
+                data: 'q-3-2',
+              },
+              {
+                type: 'uri',
+                label: '如何取得更多額度？',
+                uri: `https://liff.line.me/${process.env.LIFF_ID}/quota`,
+              },
+              {
+                type: 'postback',
+                displayText: '更多細節',
+                label: '更多細節',
+                data: 'q-3-4',
+              },
+            ],
+          },
+          quickReply: this.getReplyItems(),
+        },
+      ]);
+    else if (event.postback.data === 'q-3-1')
       await this.client.replyMessage(event.replyToken, [
         {
           type: 'text',
-          text: '好奇嗎',
-          quickReply: { items: this.getReplyItems() },
+          text: '額度以修圖所花費的秒數作為單位。您所擁有的額度可至「額度查詢」查看',
+          quickReply: this.getReplyItems(),
+        },
+      ]);
+    else if (event.postback.data === 'q-3-2')
+      await this.client.replyMessage(event.replyToken, [
+        {
+          type: 'text',
+          text: '追蹤即贈送 100 秒額度。\n若剩餘額度介於 0~20 秒，將於每日 00:00 新增至 20 秒。\n若剩餘額度為負，將於每日 00:00 新增 20 秒。',
+        },
+        {
+          type: 'image',
+          previewImageUrl:
+            'https://yue-public-bucket.s3.ap-southeast-1.amazonaws.com/replicate.jpg',
+          originalContentUrl:
+            'https://yue-public-bucket.s3.ap-southeast-1.amazonaws.com/replicate.jpg',
+          quickReply: this.getReplyItems(),
+        },
+      ]);
+    else if (event.postback.data === 'q-3-4')
+      await this.client.replyMessage(event.replyToken, [
+        {
+          type: 'text',
+          text: '每張圖在計算前會預扣 15 秒額度，算圖完成後會將此額度補回。\n若剩餘額度不足時，會收到提示訊息，請補充更多額度或減少圖片張數再嘗試。',
+          quickReply: this.getReplyItems(),
+        },
+      ]);
+    else if (event.postback.data === 'q-4')
+      await this.client.replyMessage(event.replyToken, [
+        {
+          type: 'template',
+          altText: '原理介紹',
+          template: {
+            type: 'buttons',
+            text: '請選擇項目',
+            actions: [
+              {
+                type: 'postback',
+                displayText: 'line 機器人運作介紹',
+                label: 'line 機器人運作介紹',
+                data: 'q-4-1',
+              },
+              {
+                type: 'postback',
+                displayText: 'AI 介紹',
+                label: 'AI 介紹',
+                data: 'q-4-2',
+              },
+            ],
+          },
+          quickReply: this.getReplyItems(),
+        },
+      ]);
+    else if (event.postback.data === 'q-4-1')
+      await this.client.replyMessage(event.replyToken, [
+        {
+          type: 'text',
+          text: 'line 機器人運作介紹待補',
+          quickReply: this.getReplyItems(),
+        },
+      ]);
+    else if (event.postback.data === 'q-4-2')
+      await this.client.replyMessage(event.replyToken, [
+        {
+          type: 'text',
+          text: 'AI 介紹待補',
+          quickReply: this.getReplyItems(),
         },
       ]);
   }
@@ -215,9 +351,7 @@ export class ChatService {
           {
             type: 'text',
             text: '遇到問題嗎？請在下方選擇一個，或打字輸入「管理員」',
-            quickReply: {
-              items: this.getReplyItems(),
-            },
+            quickReply: this.getReplyItems(),
           },
         ]);
       else
@@ -236,7 +370,7 @@ export class ChatService {
                 },
               ],
             },
-            quickReply: { items: this.getReplyItems() },
+            quickReply: this.getReplyItems(),
           },
         ]);
 
@@ -257,7 +391,7 @@ export class ChatService {
           {
             type: 'text',
             text: '額度可能不足，請新增額度',
-            quickReply: { items: this.getReplyItems() },
+            quickReply: this.getReplyItems(),
           },
         ]);
         throw new BadRequestError('balance insufficient');
@@ -301,6 +435,7 @@ export class ChatService {
       const url = this.s3.getSignedUrl('getObject', {
         Bucket: bucket,
         Key: filename,
+        Expires: 86400,
       });
 
       const replicateResponse = await axios.request<ReplicateResponse>({
@@ -309,16 +444,16 @@ export class ChatService {
             '7de2ea26c616d5bf2245ad0d5e24f0ff9a6204578a5c876db53142edd9d2cd56',
           input: {
             image: url,
-            codeformer_fidelity: 0.7,
-            background_enhance: true,
-            face_upsample: true,
-            upscale: 1,
+            codeformer_fidelity: user.codeformerFidelity,
+            background_enhance: user.backgroundEnhance,
+            face_upsample: user.faceUpsample,
+            upscale: user.upscale,
           },
           webhook: `https://airepair${
-            process.env.ENVR === 'test' ? '-test' : ''
-          }.celestialstudio.net/api/predict/process?imageId=${
-            newImage.id
-          }&fileExt=${fileType?.ext}&replyToken=${event.replyToken}`,
+            process.env.ENVR === 'prod' ? '' : `-${process.env.ENVR}`
+          }.celestialstudio.net/api/predict?imageId=${newImage.id}&fileExt=${
+            fileType?.ext
+          }&replyToken=${event.replyToken}`,
           webhook_events_filter: ['completed'],
         },
         headers: {

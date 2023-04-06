@@ -15,8 +15,7 @@
     "build": "webpack --config webpack.config.js",
     "pre:commit": "run-s lint test:coverage build",
     "pre:dev": "run-s fix test:coverage",
-    "pre:deploy": "run-s clean build",
-    "richmenu": "ts-node src/richmenu/index.ts"
+    "pre:deploy": "run-s clean build"
   },
   "license": "ISC",
   "dependencies": {

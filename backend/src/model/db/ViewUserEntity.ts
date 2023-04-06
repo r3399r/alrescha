@@ -12,6 +12,18 @@ export class ViewUserEntity implements ViewUser {
   @ViewColumn()
   quota!: number;
 
+  @ViewColumn({ name: 'codeformer_fidelity' })
+  codeformerFidelity!: number;
+
+  @ViewColumn({ name: 'background_enhance' })
+  backgroundEnhance!: boolean;
+
+  @ViewColumn({ name: 'face_upsample' })
+  faceUpsample!: boolean;
+
+  @ViewColumn()
+  upscale!: number;
+
   @ViewColumn()
   avg: number | null = null;
 

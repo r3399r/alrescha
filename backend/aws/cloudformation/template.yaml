@@ -79,16 +79,22 @@ Resources:
             },
             "/api/predict": {
               "post": {
-                "requestBody": {
-                  "content": {
-                    "application/json": {
-                      "schema": {
-                        "$ref": "#/components/schemas/postPredict"
-                      }
-                    }
-                  },
-                  "required": true
-                },
+                "parameters": [{
+                  "name": "imageId",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                }, {
+                  "name": "fileExt",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                }, {
+                  "name": "replyToken",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                }],
                 "responses": {
                   "200": {
                     "description": "200 response",
@@ -106,6 +112,7 @@ Resources:
                     }
                   }
                 },
+                "x-amazon-apigateway-request-validator" : "Validate query string parameters and headers",
                 "x-amazon-apigateway-integration": {
                   "type": "aws_proxy",
                   "httpMethod": "POST",
@@ -148,6 +155,57 @@ Resources:
                     }
                   }
                 },
+                "x-amazon-apigateway-integration": {
+                  "type": "aws_proxy",
+                  "httpMethod": "POST",
+                  "uri": !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:278497686406:function:${Project}-${TargetEnvr}-user/invocations",
+                  "responses": {
+                    "default": {
+                      "statusCode": "200",
+                      "responseParameters": {
+                        "method.response.header.Access-Control-Allow-Origin": "'*'"
+                      }
+                    }
+                  },
+                  "passthroughBehavior": "when_no_match",
+                  "contentHandling": "CONVERT_TO_TEXT"
+                }
+              },
+              "put": {
+                "parameters": [{
+                  "name": "id",
+                  "in": "path",
+                  "required": true,
+                  "type": "string"
+                }],
+                "requestBody": {
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/putUserId"
+                      }
+                    }
+                  },
+                  "required": true
+                },
+                "responses": {
+                  "200": {
+                    "description": "200 response",
+                    "headers": {
+                      "Access-Control-Allow-Origin": {
+                        "schema": {"type": "string"}
+                      }
+                    },
+                    "content": {
+                      "application/json": {
+                        "schema": {
+                          "$ref": "#/components/schemas/Empty"
+                        }
+                      }
+                    }
+                  }
+                },
+                "x-amazon-apigateway-request-validator" : "Validate query string parameters and headers",
                 "x-amazon-apigateway-integration": {
                   "type": "aws_proxy",
                   "httpMethod": "POST",
@@ -206,59 +264,6 @@ Resources:
                   "contentHandling": "CONVERT_TO_TEXT"
                 }
               }
-            },
-            "/api/predict/process": {
-              "post": {
-                "parameters": [{
-                  "name": "imageId",
-                  "in": "query",
-                  "required": true,
-                  "type": "string"
-                }, {
-                  "name": "fileExt",
-                  "in": "query",
-                  "required": true,
-                  "type": "string"
-                }, {
-                  "name": "replyToken",
-                  "in": "query",
-                  "required": true,
-                  "type": "string"
-                }],
-                "responses": {
-                  "200": {
-                    "description": "200 response",
-                    "headers": {
-                      "Access-Control-Allow-Origin": {
-                        "schema": {"type": "string"}
-                      }
-                    },
-                    "content": {
-                      "application/json": {
-                        "schema": {
-                          "$ref": "#/components/schemas/Empty"
-                        }
-                      }
-                    }
-                  }
-                },
-                "x-amazon-apigateway-request-validator" : "Validate query string parameters and headers",
-                "x-amazon-apigateway-integration": {
-                  "type": "aws_proxy",
-                  "httpMethod": "POST",
-                  "uri": !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:278497686406:function:${Project}-${TargetEnvr}-predict/invocations",
-                  "responses": {
-                    "default": {
-                      "statusCode": "200",
-                      "responseParameters": {
-                        "method.response.header.Access-Control-Allow-Origin": "'*'"
-                      }
-                    }
-                  },
-                  "passthroughBehavior": "when_no_match",
-                  "contentHandling": "CONVERT_TO_TEXT"
-                }
-              }
             }
           },
           "definitions": {
@@ -266,17 +271,15 @@ Resources:
               "type": "object",
               "title": "Empty Schema"
             },
-            "postPredict": {
+            "putUserId": {
               "type": "object",
               "properties": {
-                "images": { "type": "array", "items": {"type": "string"}},
-                "userId": {"type": "string"},
                 "codeformerFidelity":{"type":"number"},
                 "backgroundEnhance":{"type":"boolean"},
                 "faceUpsample":{"type":"boolean"},
                 "upscale":{"type":"number"}
               },
-              "required": ["images","userId","codeformerFidelity","backgroundEnhance","faceUpsample","upscale"]
+              "required": ["codeformerFidelity","backgroundEnhance","faceUpsample","upscale"]
             },
           },
           "x-amazon-apigateway-request-validators" : {

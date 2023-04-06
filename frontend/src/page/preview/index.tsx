@@ -9,10 +9,10 @@ const Preview = () => {
   const [results, setResults] = useState<GetUserIdPredictResponse>();
 
   useEffect(() => {
+    document.title = '瀏覽照片';
     liff.ready.then(getUserProfile).then((res) => {
       setUserId(res.userId);
     });
-    document.title = '預覽圖片';
   }, []);
 
   useEffect(() => {

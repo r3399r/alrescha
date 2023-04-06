@@ -8,7 +8,6 @@ import { BindingsHelper } from 'src/util/BindingsHelper';
 export async function chat(event: LambdaEvent, _context?: LambdaContext) {
   let service: ChatService | null = null;
   try {
-    console.log(event);
     BindingsHelper.bindClientConfig({
       channelAccessToken: String(process.env.CHANNEL_TOKEN),
       channelSecret: String(process.env.CHANNEL_SECRET),

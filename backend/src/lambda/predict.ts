@@ -22,11 +22,8 @@ export async function predict(
     let res: unknown;
 
     switch (event.resource) {
-      // case '/api/predict':
-      //   res = await apiPredict(event, service);
-      //   break;
-      case '/api/predict/process':
-        res = await apiPredictProcess(event, service);
+      case '/api/predict':
+        res = await apiPredict(event, service);
         break;
       default:
         throw new InternalServerError('unknown resource');
@@ -42,21 +39,7 @@ export async function predict(
   }
 }
 
-// async function apiPredict(event: LambdaEvent, service: PredictService) {
-//   switch (event.httpMethod) {
-//     case 'POST':
-//       if (event.body === null)
-//         throw new BadRequestError('body should not be empty');
-
-//       return service.predictImages(
-//         JSON.parse(event.body) as PostPredictRequest
-//       );
-//     default:
-//       throw new InternalServerError('unknown http method');
-//   }
-// }
-
-async function apiPredictProcess(event: LambdaEvent, service: PredictService) {
+async function apiPredict(event: LambdaEvent, service: PredictService) {
   if (event.queryStringParameters === null)
     throw new BadRequestError('queryStringParameters should not be empty');
   switch (event.httpMethod) {

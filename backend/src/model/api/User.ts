@@ -1,7 +1,6 @@
-export type GetUserIdResponse = {
-  quota: number;
-  count: number;
-};
+import { ViewUser } from 'src/model/db/ViewUser';
+
+export type GetUserIdResponse = ViewUser;
 
 export type GetUserIdPredictResponse = {
   id: string;
@@ -10,3 +9,10 @@ export type GetUserIdPredictResponse = {
   dateCreated: string | null;
   dateUpdated: string | null;
 }[];
+
+export type PutUserIdRequest = {
+  codeformerFidelity: number;
+  backgroundEnhance: boolean;
+  faceUpsample: boolean;
+  upscale: number;
+};

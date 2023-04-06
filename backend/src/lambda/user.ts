@@ -1,5 +1,6 @@
 import { bindings } from 'src/bindings';
 import { UserService } from 'src/logic/UserService';
+import { PutUserIdRequest } from 'src/model/api/User';
 import { BadRequestError, InternalServerError } from 'src/model/error';
 import { LambdaContext, LambdaEvent, LambdaOutput } from 'src/model/Lambda';
 import { BindingsHelper } from 'src/util/BindingsHelper';
@@ -48,6 +49,16 @@ async function apiUserId(event: LambdaEvent, service: UserService) {
         throw new BadRequestError('pathParameters should not be empty');
 
       return service.getUserStatus(event.pathParameters.id);
+    case 'PUT':
+      if (event.pathParameters === null)
+        throw new BadRequestError('pathParameters should not be empty');
+      if (event.body === null)
+        throw new BadRequestError('body should not be empty');
+
+      return service.updateUserSetting(
+        event.pathParameters.id,
+        JSON.parse(event.body) as PutUserIdRequest
+      );
     default:
       throw new InternalServerError('unknown http method');
   }

@@ -13,6 +13,18 @@ export class UserEntity implements User {
   @Column({ type: 'float' })
   quota!: number;
 
+  @Column({ type: 'float', name: 'codeformer_fidelity' })
+  codeformerFidelity!: number;
+
+  @Column({ type: 'boolean', name: 'background_enhance' })
+  backgroundEnhance!: boolean;
+
+  @Column({ type: 'boolean', name: 'face_upsample' })
+  faceUpsample!: boolean;
+
+  @Column({ type: 'float' })
+  upscale!: number;
+
   @Column({ type: 'timestamp', name: 'date_created', default: null })
   dateCreated!: string;
 
