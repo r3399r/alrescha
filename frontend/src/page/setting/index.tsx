@@ -77,9 +77,9 @@ const Setting = () => {
           inputMode="numeric"
         />
       </div>
-      <div className="text-grey-600 text-[12px] leading-[18px] mt-[5px]">
+      <Body className="text-grey-600 mt-[5px]">
         Balance the quality (lower number) and fidelity (higher number). (maximum: 1)
-      </div>
+      </Body>
       <H5 className="mt-6">背景增強</H5>
       <div className="flex items-center">
         <Body size="s" className="flex-1 text-grey-600">
@@ -89,12 +89,16 @@ const Setting = () => {
       </div>
       <H5 className="mt-6">臉部上取樣</H5>
       <div className="flex items-center">
-        <Body className="flex-1 text-grey-600">提高臉部解析度</Body>
+        <Body size="s" className="flex-1 text-grey-600">
+          提高臉部解析度
+        </Body>
         <Switch checked={faceUpsample} onChange={(e) => setFaceUpsample(e.target.checked)} />
       </div>
       <H5 className="mt-6">圖片放大</H5>
       <div className="flex items-center">
-        <Body className="flex-1 text-grey-600">圖片長寬放大為原始圖片的倍數</Body>
+        <Body size="s" className="flex-1 text-grey-600">
+          圖片長寬放大為原始圖片的倍數
+        </Body>
         <Input
           className="w-[40px]"
           value={upscale}
