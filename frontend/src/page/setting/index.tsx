@@ -78,7 +78,7 @@ const Setting = () => {
         />
       </div>
       <Body className="text-grey-600 mt-[5px]">
-        Balance the quality (lower number) and fidelity (higher number). (maximum: 1)
+        數值愈低表示愈高的圖片修飾度，數值愈高表示愈高的保真度。(範圍: 0~1)
       </Body>
       <H5 className="mt-6">背景增強</H5>
       <div className="flex items-center">
