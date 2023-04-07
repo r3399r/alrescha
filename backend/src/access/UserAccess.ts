@@ -37,4 +37,10 @@ export class UserAccess {
       id,
     });
   }
+
+  public async findAll() {
+    const qr = await this.database.getQueryRunner();
+
+    return await qr.manager.find<User>(UserEntity.name);
+  }
 }

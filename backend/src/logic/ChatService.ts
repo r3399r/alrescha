@@ -93,7 +93,7 @@ export class ChatService {
           type: 'action',
           action: {
             type: 'uri',
-            label: '聯絡管理員',
+            label: '聯繫管理員',
             uri: 'https://lin.ee/WSkDSDF',
           },
         },
@@ -132,9 +132,9 @@ export class ChatService {
         {
           type: 'image',
           previewImageUrl:
-            'https://yue-public-bucket.s3.ap-southeast-1.amazonaws.com/replicate.jpg',
+            'https://yue-public-bucket.s3.ap-southeast-1.amazonaws.com/alrescha-intro.jpg',
           originalContentUrl:
-            'https://yue-public-bucket.s3.ap-southeast-1.amazonaws.com/replicate.jpg',
+            'https://yue-public-bucket.s3.ap-southeast-1.amazonaws.com/alrescha-intro.jpg',
         },
         {
           type: 'text',
@@ -160,9 +160,13 @@ export class ChatService {
           altText: '目前額度',
           template: {
             type: 'buttons',
-            text: `目前剩餘額度: ${user.quota} 秒\n您已修復 ${
-              user.count ?? 0
-            } 張圖\n每張圖平均花費 ${bn(user.avg).dp(2).toNumber()} 秒`,
+            text: `額度以 AI 算圖所花費的秒數作為單位。\n目前剩餘額度: ${
+              user.quota
+            } 秒\n您已修復 ${user.count ?? 0} 張圖\n每張圖平均花費 ${bn(
+              user.avg
+            )
+              .dp(2)
+              .toNumber()} 秒`,
             actions: [
               {
                 type: 'uri',
@@ -197,8 +201,8 @@ export class ChatService {
               },
               {
                 type: 'postback',
-                displayText: '額度介紹',
-                label: '額度介紹',
+                displayText: '額度相關',
+                label: '額度相關',
                 data: 'q-3',
               },
               {
@@ -220,7 +224,7 @@ export class ChatService {
         },
         {
           type: 'text',
-          text: '若原始圖片過大導致 AI 計算超過 1 分鐘，則不會從劉天是傳送結果回來，但仍可以在「瀏覽照片」中找到修好的圖',
+          text: '若原始圖片過大導致 AI 計算超過 1 分鐘，則不會從聊天室傳送結果回來，但仍可以在「瀏覽照片」中找到修好的圖',
           quickReply: this.getReplyItems(),
         },
       ]);
@@ -245,7 +249,7 @@ export class ChatService {
                 type: 'postback',
                 displayText: '額度查詢',
                 label: '額度查詢',
-                data: 'q-3-1',
+                data: 'quota',
               },
               {
                 type: 'postback',
@@ -269,14 +273,6 @@ export class ChatService {
           quickReply: this.getReplyItems(),
         },
       ]);
-    else if (event.postback.data === 'q-3-1')
-      await this.client.replyMessage(event.replyToken, [
-        {
-          type: 'text',
-          text: '額度以修圖所花費的秒數作為單位。您所擁有的額度可至「額度查詢」查看',
-          quickReply: this.getReplyItems(),
-        },
-      ]);
     else if (event.postback.data === 'q-3-2')
       await this.client.replyMessage(event.replyToken, [
         {
@@ -286,9 +282,9 @@ export class ChatService {
         {
           type: 'image',
           previewImageUrl:
-            'https://yue-public-bucket.s3.ap-southeast-1.amazonaws.com/replicate.jpg',
+            'https://yue-public-bucket.s3.ap-southeast-1.amazonaws.com/alrescha-info.png',
           originalContentUrl:
-            'https://yue-public-bucket.s3.ap-southeast-1.amazonaws.com/replicate.jpg',
+            'https://yue-public-bucket.s3.ap-southeast-1.amazonaws.com/alrescha-info.png',
           quickReply: this.getReplyItems(),
         },
       ]);
@@ -311,14 +307,14 @@ export class ChatService {
             actions: [
               {
                 type: 'postback',
-                displayText: 'line 機器人運作介紹',
-                label: 'line 機器人運作介紹',
+                displayText: 'LINE 機器人運作介紹',
+                label: 'LINE 機器人運作介紹',
                 data: 'q-4-1',
               },
               {
                 type: 'postback',
-                displayText: 'AI 介紹',
-                label: 'AI 介紹',
+                displayText: 'AI 修復原理介紹',
+                label: 'AI 修復原理介紹',
                 data: 'q-4-2',
               },
             ],
@@ -330,7 +326,11 @@ export class ChatService {
       await this.client.replyMessage(event.replyToken, [
         {
           type: 'text',
-          text: 'line 機器人運作介紹待補',
+          text: '此 LINE 機器人的開發模式與一般的機器人不同，我們使用 AWS Lambda 來實現「無伺服器 (Serverless)」的開發框架。當有人互動時才觸發，並在無人使用時關閉，減少資源浪費，用最有效率的方式為大家服務。',
+        },
+        {
+          type: 'text',
+          text: '瞭解更多關於「Serverless」：https://blossom-route-535.notion.site/AWS-Serverless-Instruction-3605caed35104a0f9775dfab65660298',
           quickReply: this.getReplyItems(),
         },
       ]);
@@ -338,7 +338,11 @@ export class ChatService {
       await this.client.replyMessage(event.replyToken, [
         {
           type: 'text',
-          text: 'AI 介紹待補',
+          text: '基於神經網絡的機器學習方法，從大量的照片數據中自動學習和提取複雜的特徵表示。',
+        },
+        {
+          type: 'text',
+          text: '瞭解更多關於「CodeFormer」：https://shangchenzhou.com/projects/CodeFormer/',
           quickReply: this.getReplyItems(),
         },
       ]);
@@ -358,15 +362,15 @@ export class ChatService {
         await this.client.replyMessage(event.replyToken, [
           {
             type: 'template',
-            altText: '聯絡管理員',
+            altText: '聯繫管理員',
             template: {
               type: 'buttons',
-              text: '請點擊下方按鈕以聯絡管理員',
+              text: '請點擊下方按鈕以聯繫管理員',
               actions: [
                 {
                   type: 'uri',
-                  label: '聯絡管理員',
-                  uri: 'https://docs.google.com/forms/d/e/1FAIpQLSdaWAnpxINF4m1msJQT-Qr9yAyukZHlUQSoEpZktv0ZId0n0Q/viewform?usp=sf_link',
+                  label: '聯繫管理員',
+                  uri: 'https://lin.ee/WSkDSDF',
                 },
               ],
             },

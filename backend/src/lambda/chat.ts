@@ -10,7 +10,6 @@ export async function chat(event: LambdaEvent, _context?: LambdaContext) {
   try {
     BindingsHelper.bindClientConfig({
       channelAccessToken: String(process.env.CHANNEL_TOKEN),
-      channelSecret: String(process.env.CHANNEL_SECRET),
     });
     service = bindings.get(ChatService);
 

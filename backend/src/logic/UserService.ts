@@ -1,3 +1,4 @@
+import { Client } from '@line/bot-sdk';
 import { S3 } from 'aws-sdk';
 import { inject, injectable } from 'inversify';
 import { DbAccess } from 'src/access/DbAccess';
@@ -7,9 +8,12 @@ import { ViewUserAccess } from 'src/access/ViewUserAccess';
 import {
   GetUserIdPredictResponse,
   GetUserIdResponse,
+  GetUserResponse,
+  PutUserIdQuotaRequest,
   PutUserIdRequest,
 } from 'src/model/api/User';
 import { BadRequestError } from 'src/model/error';
+import { bn } from 'src/util/bignumber';
 import { compare } from 'src/util/compare';
 
 /**
@@ -32,8 +36,23 @@ export class UserService {
   @inject(ImageAccess)
   private readonly imageAccess!: ImageAccess;
 
+  @inject(Client)
+  private readonly client!: Client;
+
   public async cleanup() {
     await this.dbAccess.cleanup();
+  }
+
+  public async getUsers(): Promise<GetUserResponse> {
+    const userList = await this.viewUserAccess.findAll();
+
+    return await Promise.all(
+      userList.map(async (v) => {
+        const profile = await this.client.getProfile(v.id);
+
+        return { ...v, pictureUrl: profile.pictureUrl ?? null };
+      })
+    );
   }
 
   public async getUserStatus(userId: string): Promise<GetUserIdResponse> {
@@ -49,6 +68,18 @@ export class UserService {
     user.faceUpsample = data.faceUpsample;
     user.upscale = data.upscale;
     await this.userAccess.update(user);
+  }
+
+  public async addUserQuota(userId: string, data: PutUserIdQuotaRequest) {
+    if (data.code !== process.env.CODE) throw new BadRequestError('wrong code');
+
+    const user = await this.userAccess.findById(userId);
+    if (user === null) throw new BadRequestError('no user found');
+
+    user.quota = bn(user.quota).plus(data.addQuota).toNumber();
+    await this.userAccess.update(user);
+
+    return user;
   }
 
   public async getPredictUrl(

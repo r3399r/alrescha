@@ -7,6 +7,7 @@ import { UserAccess } from './access/UserAccess';
 import { ViewUserAccess } from './access/ViewUserAccess';
 import { ChatService } from './logic/ChatService';
 import { PredictService } from './logic/PredictService';
+import { ReplenishService } from './logic/ReplenishService';
 import { UserService } from './logic/UserService';
 import { ImageEntity } from './model/db/ImageEntity';
 import { UserEntity } from './model/db/UserEntity';
@@ -31,6 +32,7 @@ container.bind<ViewUserAccess>(ViewUserAccess).toSelf();
 // service
 container.bind<ChatService>(ChatService).toSelf();
 container.bind<PredictService>(PredictService).toSelf();
+container.bind<ReplenishService>(ReplenishService).toSelf();
 container.bind<UserService>(UserService).toSelf();
 
 // AWS

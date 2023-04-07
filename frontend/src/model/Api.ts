@@ -1,23 +1,10 @@
-export type PostPredictRequest = {
-  images: string[];
-  userId: string;
-  codeformerFidelity: number;
-  backgroundEnhance: boolean;
-  faceUpsample: boolean;
-  upscale: number;
-};
+import { User, ViewUser } from './User';
 
-export type GetUserIdResponse = {
-  id: string;
-  name: string;
-  quota: number;
-  codeformerFidelity: number;
-  backgroundEnhance: boolean;
-  faceUpsample: boolean;
-  upscale: number;
-  avg: number | null;
-  count: number | null;
-};
+export type GetUserResponse = (ViewUser & {
+  pictureUrl: string | null;
+})[];
+
+export type GetUserIdResponse = ViewUser;
 
 export type GetUserIdPredictResponse = {
   id: string;
@@ -33,3 +20,10 @@ export type PutUserIdRequest = {
   faceUpsample: boolean;
   upscale: number;
 };
+
+export type PutUserIdQuotaRequest = {
+  addQuota: number;
+  code: string;
+};
+
+export type PutUserIdQuotaResponse = User;

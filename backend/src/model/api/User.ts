@@ -1,5 +1,7 @@
 import { ViewUser } from 'src/model/db/ViewUser';
 
+export type GetUserResponse = (ViewUser & { pictureUrl: string | null })[];
+
 export type GetUserIdResponse = ViewUser;
 
 export type GetUserIdPredictResponse = {
@@ -15,4 +17,9 @@ export type PutUserIdRequest = {
   backgroundEnhance: boolean;
   faceUpsample: boolean;
   upscale: number;
+};
+
+export type PutUserIdQuotaRequest = {
+  addQuota: number;
+  code: string;
 };

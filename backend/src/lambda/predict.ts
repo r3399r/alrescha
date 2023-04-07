@@ -14,7 +14,6 @@ export async function predict(
 
   BindingsHelper.bindClientConfig({
     channelAccessToken: String(process.env.CHANNEL_TOKEN),
-    channelSecret: String(process.env.CHANNEL_SECRET),
   });
   try {
     service = bindings.get(PredictService);
