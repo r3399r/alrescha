@@ -127,7 +127,7 @@ export class ChatService {
       await this.client.replyMessage(event.replyToken, [
         {
           type: 'text',
-          text: '你好！我是 AI 照片修復師，上傳模糊的舊照片，我幫你把它變高清！',
+          text: '您好！我是 AI 照片修復師，上傳照片，讓我幫您把照片中的五官變清晰！',
         },
         {
           type: 'image',
