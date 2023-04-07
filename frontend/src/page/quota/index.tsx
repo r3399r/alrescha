@@ -34,7 +34,7 @@ const Quota = () => {
       </div>
       <div className="mt-10 p-[15px] flex gap-[5px] items-center bg-grey-200">
         <img src={IcNotice} />
-        <Body>匯款完成後請主動聯繫管理員進行對帳。</Body>
+        <Body>匯款完成後請主動至「聯繫管理員」通知我們，以利盡快完成加值服務</Body>
       </div>
     </div>
   );
