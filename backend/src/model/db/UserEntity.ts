@@ -1,23 +1,29 @@
 import { BeforeInsert, BeforeUpdate, Column, Entity, Generated } from 'typeorm';
-import { Treasure } from './Treasure';
+import { User } from './User';
 
-@Entity({ name: 'treasure' })
-export class TreasureEntity implements Treasure {
+@Entity({ name: 'user' })
+export class UserEntity implements User {
   @Column({ primary: true })
   @Generated('uuid')
   id!: string;
 
-  @Column({ type: 'text', name: 'user_id' })
-  userId!: string;
-
-  @Column({ type: 'text', name: 'display_name' })
-  displayName!: string;
+  @Column({ type: 'text' })
+  name!: string;
 
   @Column({ type: 'float' })
-  stage!: number;
+  quota!: number;
 
-  @Column({ type: 'text' })
-  status!: string;
+  @Column({ type: 'float', name: 'codeformer_fidelity' })
+  codeformerFidelity!: number;
+
+  @Column({ type: 'boolean', name: 'background_enhance' })
+  backgroundEnhance!: boolean;
+
+  @Column({ type: 'boolean', name: 'face_upsample' })
+  faceUpsample!: boolean;
+
+  @Column({ type: 'float' })
+  upscale!: number;
 
   @Column({ type: 'timestamp', name: 'date_created', default: null })
   dateCreated!: string;

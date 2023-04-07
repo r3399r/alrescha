@@ -1,9 +1,9 @@
-export type Treasure = {
+export type Image = {
   id: string;
   userId: string;
-  displayName: string;
-  stage: number;
   status: string;
+  predictId: string | null;
+  predictTime: number | null;
   dateCreated: string | null;
   dateUpdated: string | null;
 };
