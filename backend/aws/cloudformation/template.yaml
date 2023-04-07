@@ -466,6 +466,7 @@ Resources:
           DB_PWD: !Sub '{{resolve:ssm:${TargetEnvr}-db-pwd:1}}'
           DB_USER: !Sub '{{resolve:ssm:${TargetEnvr}-db-user:1}}'
           CHANNEL_TOKEN: !Sub '{{resolve:ssm:${Project}-${TargetEnvr}-line-token:1}}'
+          LIFF_ID: !Sub '{{resolve:ssm:${Project}-${TargetEnvr}-liff:1}}'
   InvokePermissionPredict:
     Type: AWS::Lambda::Permission
     DependsOn: [ServerlessApi, LambdaPredict]
