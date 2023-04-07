@@ -1,6 +1,6 @@
 {
   "name": "alrescha-frontend",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "scripts": {
     "start": "VITE_LIFF_ID=$(aws ssm get-parameter --name alrescha-test-liff | jq .Parameter.Value | sed -e 's/^\"//' -e 's/\"$//') vite",
     "compile": "tsc",
