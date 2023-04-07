@@ -28,13 +28,22 @@ const Setting = () => {
   const onSubmit = () => {
     if (
       fidelity === undefined ||
+      isNaN(Number(fidelity)) ||
       bgEnhance === undefined ||
       faceUpsample === undefined ||
       upscale === undefined
     )
       return;
+    let tempFidelity = Number(fidelity);
+    if (Number(fidelity) > 1) {
+      setFidelity('1');
+      tempFidelity = 1;
+    } else if (Number(fidelity) < 0) {
+      setFidelity('0');
+      tempFidelity = 0;
+    }
     updateUserSetting({
-      codeformerFidelity: Number(fidelity),
+      codeformerFidelity: tempFidelity,
       backgroundEnhance: bgEnhance,
       faceUpsample: faceUpsample,
       upscale: Number(upscale),
