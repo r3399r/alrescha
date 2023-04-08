@@ -2,6 +2,7 @@ import { Readable } from 'stream';
 import {
   Client,
   FollowEvent,
+  Message,
   MessageEvent,
   PostbackEvent,
   QuickReply,
@@ -101,6 +102,45 @@ export class ChatService {
     };
   }
 
+  private getQuotaRelatedMessage(): Message[] {
+    return [
+      {
+        type: 'template',
+        altText: '額度相關',
+        template: {
+          type: 'buttons',
+          text: '請選擇項目',
+          actions: [
+            {
+              type: 'postback',
+              displayText: '我能擁有多少免費額度？',
+              label: '我能擁有多少免費額度？',
+              data: 'q-3-2',
+            },
+            {
+              type: 'uri',
+              label: '如何取得更多額度？',
+              uri: `https://liff.line.me/${process.env.LIFF_ID}/quota`,
+            },
+            {
+              type: 'postback',
+              displayText: '額度單位',
+              label: '額度單位',
+              data: 'q-3-1',
+            },
+            {
+              type: 'postback',
+              displayText: '更多細節',
+              label: '更多細節',
+              data: 'q-3-4',
+            },
+          ],
+        },
+        quickReply: this.getReplyItems(),
+      },
+    ];
+  }
+
   public async follow(event: FollowEvent) {
     if (event.source.userId === undefined) return;
     const userId = event.source.userId;
@@ -127,7 +167,7 @@ export class ChatService {
       await this.client.replyMessage(event.replyToken, [
         {
           type: 'text',
-          text: '您好！我是 AI 照片修復師，上傳照片，讓我幫您把照片中的五官變清晰！',
+          text: '您好！我是 AI 照片人臉修復師，我的專長是修復照片中的人臉，上傳照片，讓我幫您把照片中的五官變清晰！',
         },
         {
           type: 'image',
@@ -135,6 +175,10 @@ export class ChatService {
             'https://yue-public-bucket.s3.ap-southeast-1.amazonaws.com/alrescha-intro.jpg',
           originalContentUrl:
             'https://yue-public-bucket.s3.ap-southeast-1.amazonaws.com/alrescha-intro.jpg',
+        },
+        {
+          type: 'text',
+          text: '如需測試資料，歡迎使用此連結中的檔案 https://drive.google.com/drive/folders/12v4FCnBiAnpQ-aaG-6lb5hhx3xZ_8FPq',
         },
         {
           type: 'text',
@@ -156,27 +200,12 @@ export class ChatService {
 
       await this.client.replyMessage(event.replyToken, [
         {
-          type: 'template',
-          altText: '目前額度',
-          template: {
-            type: 'buttons',
-            text: `額度以 AI 算圖所花費的秒數作為單位。\n目前剩餘額度: ${
-              user.quota
-            } 秒\n您已修復 ${user.count ?? 0} 張圖\n每張圖平均花費 ${bn(
-              user.avg
-            )
-              .dp(2)
-              .toNumber()} 秒`,
-            actions: [
-              {
-                type: 'uri',
-                label: '如何取得更多額度？',
-                uri: `https://liff.line.me/${process.env.LIFF_ID}/quota`,
-              },
-            ],
-          },
-          quickReply: this.getReplyItems(),
+          type: 'text',
+          text: `目前剩餘額度: ${user.quota} 秒\n您已修復 ${
+            user.count ?? 0
+          } 張圖\n每張圖平均花費 ${bn(user.avg).dp(2).toNumber()} 秒`,
         },
+        ...this.getQuotaRelatedMessage(),
       ]);
     } else if (event.postback.data === 'faq')
       await this.client.replyMessage(event.replyToken, [
@@ -237,39 +266,15 @@ export class ChatService {
         },
       ]);
     else if (event.postback.data === 'q-3')
+      await this.client.replyMessage(
+        event.replyToken,
+        this.getQuotaRelatedMessage()
+      );
+    else if (event.postback.data === 'q-3-1')
       await this.client.replyMessage(event.replyToken, [
         {
-          type: 'template',
-          altText: '額度介紹',
-          template: {
-            type: 'buttons',
-            text: '請選擇項目',
-            actions: [
-              {
-                type: 'postback',
-                displayText: '額度查詢',
-                label: '額度查詢',
-                data: 'quota',
-              },
-              {
-                type: 'postback',
-                displayText: '我能擁有多少免費額度？',
-                label: '我能擁有多少免費額度？',
-                data: 'q-3-2',
-              },
-              {
-                type: 'uri',
-                label: '如何取得更多額度？',
-                uri: `https://liff.line.me/${process.env.LIFF_ID}/quota`,
-              },
-              {
-                type: 'postback',
-                displayText: '更多細節',
-                label: '更多細節',
-                data: 'q-3-4',
-              },
-            ],
-          },
+          type: 'text',
+          text: '額度以 AI 算圖所花費的秒數作為單位。',
           quickReply: this.getReplyItems(),
         },
       ]);
