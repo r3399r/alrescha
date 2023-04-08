@@ -50,7 +50,11 @@ export class UserService {
       userList.map(async (v) => {
         const profile = await this.client.getProfile(v.id);
 
-        return { ...v, pictureUrl: profile.pictureUrl ?? null };
+        return {
+          ...v,
+          name: profile.displayName,
+          pictureUrl: profile.pictureUrl ?? null,
+        };
       })
     );
   }
