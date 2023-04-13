@@ -42,11 +42,16 @@ const Setting = () => {
       setFidelity('0');
       tempFidelity = 0;
     }
+    let tempUpsacle = Number(upscale);
+    if (Number(upscale) <= 0) {
+      setUpscale('1');
+      tempUpsacle = 1;
+    }
     updateUserSetting({
       codeformerFidelity: tempFidelity,
       backgroundEnhance: bgEnhance,
       faceUpsample: faceUpsample,
-      upscale: Number(upscale),
+      upscale: tempUpsacle,
     }).then(() => liff.closeWindow());
   };
 
@@ -97,13 +102,15 @@ const Setting = () => {
       <H5 className="mt-6">圖片放大</H5>
       <div className="flex items-center">
         <Body size="s" className="flex-1 text-grey-600">
-          圖片長寬放大為原始圖片的倍數
+          圖片長寬放大為原始圖片的倍數，愈大的畫布會有愈多的利用空間，但檔案也會變很大，建議一般情況設
+          1，十年以上舊照片設 2+
         </Body>
         <Input
           className="w-[40px]"
           value={upscale}
           onChange={(e) => setUpscale(e.target.value)}
           inputMode="numeric"
+          regex={new RegExp('^[0-9]*$')}
         />
       </div>
       <div className="flex justify-center gap-5 mt-6 mb-9">
