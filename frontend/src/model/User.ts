@@ -8,6 +8,7 @@ export type ViewUser = {
   upscale: number;
   avg: number | null;
   count: number | null;
+  lastDateUpdated: string;
 };
 
 export type User = {

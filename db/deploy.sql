@@ -1,3 +1,2 @@
-\i ./table/image.sql
-\i ./table/user.sql
+\i ./scripts/drop_all_views.sql
 \i ./view/v_user.sql
