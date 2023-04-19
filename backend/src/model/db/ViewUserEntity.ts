@@ -29,4 +29,7 @@ export class ViewUserEntity implements ViewUser {
 
   @ViewColumn()
   count: number | null = null;
+
+  @ViewColumn({ name: 'last_date_updated' })
+  lastDateUpdated!: string;
 }

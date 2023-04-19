@@ -31,6 +31,7 @@ export class Database {
         entities: this.entities,
         synchronize: false,
         logging: false,
+        timeTravelQueries: false,
       });
     if (!this.dataSource.isInitialized) await this.dataSource.initialize();
 

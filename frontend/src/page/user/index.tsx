@@ -59,16 +59,17 @@ const User = () => {
                 ) : (
                   <div className="w-[50px] bg-grey-500 rounded-full" />
                 )}
-                <div className="flex w-full items-center">
+                <div className="flex gap-1 w-full items-center">
                   <div className="flex items-center w-full lg:w-2/3 flex-col lg:flex-row">
-                    <Body size="l" className="w-full lg:w-1/2 px-[10px]">
-                      {v.name}
-                    </Body>
+                    <div className="w-full lg:w-1/2 px-[10px]">
+                      <Body className="text-grey-600 break-all">{v.id}</Body>
+                      <Body size="l">{v.name}</Body>
+                    </div>
                     <Body className="w-full lg:w-1/2 px-[10px] text-blue font-bold">
                       {v.quota} 秒
                     </Body>
                   </div>
-                  <div className="w-full lg:w-1/3 text-right px-[10px]">
+                  <div className="w-fit lg:w-1/3 text-right pr-[10px]">
                     <Button onClick={() => setSelected(v.id)}>管理</Button>
                   </div>
                 </div>
