@@ -23,5 +23,4 @@ select u.id,
         u.date_updated
     ) as last_date_updated
 from "user" u
-    left join tmp t on t.user_id = u.id
-order by last_date_updated desc;
+    left join tmp t on t.user_id = u.id;

@@ -14,7 +14,9 @@ export class ViewUserAccess {
   public async findAll() {
     const qr = await this.database.getQueryRunner();
 
-    return await qr.manager.find<ViewUser>(ViewUserEntity.name);
+    return await qr.manager.find<ViewUser>(ViewUserEntity.name, {
+      order: { lastDateUpdated: 'desc' },
+    });
   }
 
   public async findById(id: string) {
