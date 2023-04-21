@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Button from 'src/component/Button';
 import Divider from 'src/component/Divider';
 import Input from 'src/component/Input';
@@ -9,6 +10,7 @@ import { GetUserResponse } from 'src/model/Api';
 import { addQuotaToUser, getUserList } from 'src/service/userService';
 
 const User = () => {
+  const navigate = useNavigate();
   const [selected, setSelected] = useState<string>();
   const [userList, setUserList] = useState<GetUserResponse>();
   const [input, setInput] = useState<string>('');
@@ -62,7 +64,12 @@ const User = () => {
                 <div className="flex gap-1 w-full items-center">
                   <div className="flex items-center w-full lg:w-2/3 flex-col lg:flex-row">
                     <div className="w-full lg:w-1/2 px-[10px]">
-                      <Body className="text-grey-600 break-all">{v.id}</Body>
+                      <Body
+                        className="text-grey-600 break-all"
+                        onClick={() => navigate(`/preview?id=${v.id}`)}
+                      >
+                        {v.id}
+                      </Body>
                       <Body size="l">{v.name}</Body>
                     </div>
                     <Body className="w-full lg:w-1/2 px-[10px] text-blue font-bold">
